@@ -61,24 +61,20 @@ var screen = [
     " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "
 ]
 
+let windowBackground = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
+
 class ViewController: NSViewController {
     var renderer: Renderer!
     var mtkView: MTKView!
 
     override func viewDidLoad() {
-
-//        var triangleVertices: [((Float, Float), (Float, Float), (Float,Float,Float,Float))] = [
-//             (( 250, -250), (0,0), (1, 0, 0, 1)),
-//             ((-250, -250), (0,0), (1, 0, 0, 1)),
-//             ((   0, -250), (0,0), (1, 0, 0, 1))
-//        ]
         super.viewDidLoad()
         mtkView = MTKView(frame: view.frame)
         self.view = mtkView
 
         mtkView.enableSetNeedsDisplay = true
         mtkView.device = MTLCreateSystemDefaultDevice()
-//        mtkView.clearColor = MTLClearColorMake(0.0, 0.5, 1.0, 1.0)
+        mtkView.clearColor = windowBackground
 
         renderer = Renderer(metalKitView: mtkView)!
 
