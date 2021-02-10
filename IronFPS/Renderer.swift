@@ -77,8 +77,11 @@ class Renderer: NSObject, MTKViewDelegate {
         let offset = (x: Float32(-640), y: Float32(-288))
         for w in 0..<screenWidth {
             for h in 0..<screenHeight {
-                squares.append(square(origin: offset.x + Point(Float32(w) * pixelSize, offset.y + Float32(h) * pixelSize),
-                                      size: pixelSize, color: screen[w+h*screenHeight]))
+                let origin = offset.x + Point(Float32(w) * pixelSize, offset.y + Float32(h) * pixelSize)
+                let color = screen[h*screenWidth+w]
+                squares.append(square(origin: origin,
+                                      size: pixelSize,
+                                      color: color))
             }
         }
 

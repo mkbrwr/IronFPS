@@ -18,7 +18,7 @@ var fPlayerA = 0.0
 var mapHeight = 16
 var mapWidht = 16
 
-var fFOV = Double.pi / 4.0
+var fFOV = Double.pi / 6.0
 var depth = 16.0
 
 let map = [
@@ -41,12 +41,12 @@ let map = [
 ]
 
 enum Move {
-    case up, down, left, right
+    case foreward, backward, left, right
 
     init?(keyCode: UInt16) {
         switch keyCode {
-        case 13, 126: self = .up
-        case  1, 125: self = .down
+        case 13, 126: self = .foreward
+        case  1, 125: self = .backward
         case  0, 123: self = .left
         case  2, 124: self = .right
         default: return nil
@@ -69,6 +69,9 @@ class ViewController: NSViewController {
             fPlayerA -= 0.1
         case .right:
             fPlayerA += 0.1
+        case .foreward:
+            playerX += sin(fPlayerA) * 0.5
+            playerY += cos(fPlayerA) * 0.5
         default: break
         }
         return nil
@@ -97,7 +100,7 @@ class ViewController: NSViewController {
     }
 
     func runLoop() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [unowned self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(10)) { [unowned self] in
             self.runLoop()
             mtkView.setNeedsDisplay(mtkView.frame)
         }
