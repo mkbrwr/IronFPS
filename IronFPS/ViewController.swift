@@ -146,7 +146,7 @@ class ViewController: NSViewController {
                 color = .black
             }
             for y in 0..<screenHeight {
-                if y < ceiling {
+                if y <= ceiling {
                     screen[y * screenWidth + x] = .black
                 } else if y > ceiling && y <= floor {
                     screen[y * screenWidth + x] = color
