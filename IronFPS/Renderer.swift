@@ -7,6 +7,7 @@
 
 import MetalKit
 import simd
+import Algorithms
 
 struct Vertex {
     let position: SIMD2<Float32>
@@ -26,19 +27,23 @@ func triangle(_ a: SIMD2<Float32>, _ b: SIMD2<Float32>, _ c: SIMD2<Float32>) -> 
 }
 
 /// origin bottom left
-func square(origin: SIMD2<Float32>, size: Float32) -> [Vertex] {
+func square(origin: SIMD2<Float32>, size: Float32) -> Square {
     let a = SIMD2<Float32>(origin.x, origin.y)
     let b = SIMD2<Float32>(origin.x, origin.y + size)
     let c = SIMD2<Float32>(origin.x + size, origin.y)
     let d = SIMD2<Float32>(origin.x + size, origin.y + size)
 
     let square: [Vertex] = triangle(a, b, c) + triangle(b, c, d)
-    return square
+    return Square(vertices: square)
 }
 
-var screenDimensions = (width: Int(3), height: Int(7))
+struct Square {
+    let vertices: [Vertex]
+}
 
-let pixelSize: Float32 = 24
+var screenDimensions = (width: Int(160), height: Int(144))
+
+let pixelSize: Float32 = 10
 
 class Renderer: NSObject, MTKViewDelegate {
     let device: MTLDevice
@@ -46,8 +51,6 @@ class Renderer: NSObject, MTKViewDelegate {
 
     var viewportSize: (UInt32, UInt32) = (0, 0)
     var pipelineState: MTLRenderPipelineState!
-
-    var triangleVertices: [Vertex] = []
 
     init?(metalKitView: MTKView) {
         device = metalKitView.device!
@@ -73,10 +76,11 @@ class Renderer: NSObject, MTKViewDelegate {
     func draw(in view: MTKView) {
         debugPrint("\(#function)")
         // Worked with tuples
-        var triangleVertices: [Vertex] = []
+        var squares: [Square] = []
+        let offset = (x: Float32(-640), y: Float32(-288))
         for w in 0..<screenDimensions.width {
             for h in 0..<screenDimensions.height {
-                triangleVertices += square(origin: SIMD2<Float32>(Float32(h) * pixelSize, Float32(w) * pixelSize), size: pixelSize)
+                squares.append(square(origin: offset.x + SIMD2<Float32>(Float32(h) * pixelSize, offset.y + Float32(w) * pixelSize), size: pixelSize))
             }
         }
 
@@ -102,23 +106,19 @@ class Renderer: NSObject, MTKViewDelegate {
         renderEncoder.setRenderPipelineState(pipelineState)
 
 
+        for square in squares {
+        var triangles = square.vertices
         // Pass in the paramter data.
-        let buffer = device.makeBuffer(bytes: &triangleVertices,
-                                       length: 4096, // size of the buffer does not affect the result for some reason
-                                       options: .storageModeShared)
-
-        renderEncoder.setVertexBuffer(buffer, offset: 0, index: 0)
-        renderEncoder.setVertexBytes(&triangleVertices,
-                                     length: Vertex.lenght * triangleVertices.count,
+        renderEncoder.setVertexBytes(&triangles,
+                                     length: Vertex.lenght * triangles.count,
                                      index: 0)
-
-        let buffer2 = device.makeBuffer(bytes: &viewportSize, length: 16, options: .storageModeShared)
-        renderEncoder.setVertexBuffer(buffer2, offset: 0, index: 1)
+        renderEncoder.setVertexBytes(&viewportSize, length: 16, index: 1)
 
         // Draw the triangle.
         renderEncoder.drawPrimitives(type: .triangle,
                                      vertexStart: 0,
-                                     vertexCount: triangleVertices.count)
+                                     vertexCount: triangles.count)
+        }
         renderEncoder.endEncoding()
         commandBuffer.present(view.currentDrawable!)
         commandBuffer.commit()

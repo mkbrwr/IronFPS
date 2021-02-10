@@ -8,8 +8,8 @@
 import Cocoa
 import MetalKit
 
-var screenWidth = 960
-var screenHeight = 540
+var screenWidth = 160
+var screenHeight = 144
 // aspect 16/9
 
 var playerX = 8.0
