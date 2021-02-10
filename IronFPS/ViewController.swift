@@ -10,7 +10,6 @@ import MetalKit
 
 var screenWidth = 160
 var screenHeight = 144
-// aspect 16/9
 
 var playerX = 8.0
 var playerY = 8.0
@@ -26,12 +25,12 @@ let map = [
     "#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
+    "#",".",".",".",".",".","#","#","#",".",".",".",".",".","#","#",
+    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
+    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
+    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
+    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
+    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
@@ -41,31 +40,44 @@ let map = [
     "#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"
 ]
 
-var screen = [
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ",
-    " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "
-]
+enum Move {
+    case up, down, left, right
+
+    init?(keyCode: UInt16) {
+        switch keyCode {
+        case 13, 126: self = .up
+        case  1, 125: self = .down
+        case  0, 123: self = .left
+        case  2, 124: self = .right
+        default: return nil
+        }
+    }
+}
+
+var screen = Array<Color>.init(repeating: .black, count: 160 * 144)
 
 let windowBackground = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
 
 class ViewController: NSViewController {
     var renderer: Renderer!
     var mtkView: MTKView!
+
+    var keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { event in
+        debugPrint(event)
+        switch Move(keyCode: event.keyCode) {
+        case .left:
+            fPlayerA -= 0.1
+        case .right:
+            fPlayerA += 0.1
+        default: break
+        }
+        return event
+    })
+
+//    var keyUp = NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: { event in
+//        debugPrint(Move(keyCode: event.keyCode) ?? "WASD")
+//        return event
+//    })
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,9 +97,9 @@ class ViewController: NSViewController {
     }
 
     func runLoop() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { [unowned self] in
-            debugPrint("Render new frame")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [unowned self] in
             self.runLoop()
+            mtkView.setNeedsDisplay(mtkView.frame)
         }
 
         for x in 0..<screenWidth {
@@ -116,28 +128,43 @@ class ViewController: NSViewController {
                     }
                 }
             }
-
             // Calculate distance to ceiling and floor
             let ceiling = Int(Double(screenHeight) / 2.0 - Double(screenHeight) / Double(distanceToWall))
             let floor = screenHeight - ceiling
 
-//            for y in 0..<screenHeight {
-//                if y < ceiling {
-//                    screen[y * screenWidth + x] = " "
-//                } else if y > ceiling && y <= floor {
-//                    screen[y * screenWidth + x] = "#"
-//                } else {
-//                    screen[y * screenWidth + x] = "."
-//                }
-//            }
+            var color: Color
+            switch distanceToWall {
+            case let x where x <= depth / 4:
+                color = Color.white(shade: 1)
+            case let x where x <= depth / 3:
+                color = Color.white(shade: 0.85)
+            case let x where x <= depth / 2:
+                color = Color.white(shade: 0.65)
+            case let x where x < depth:
+                color = Color.white(shade: 0.51)
+            default:
+                color = .black
+            }
+            for y in 0..<screenHeight {
+                if y < ceiling {
+                    screen[y * screenWidth + x] = .black
+                } else if y > ceiling && y <= floor {
+                    screen[y * screenWidth + x] = color
+                } else {
+                    screen[y * screenWidth + x] = .sky
+                }
+            }
 
         }
     }
+}
 
-
-//    override var representedObject: Any? {
-//        didSet {
-//        // Update the view, if already loaded.
-//        }
-//    }
+extension Color {
+    static let sky = Color(0.5, 0.0, 0.2, 1.0)
+    static let lightGray = Color(0.5, 0.5, 0.5, 1.0)
+    static let gray = Color(0.5, 0.5, 0.5, 1.0)
+    static let darkGray = Color(0.2, 0.2, 0.2, 1.0)
+    static let black =  Color(0, 0, 0, 1)
+    static let white = Color(1, 1, 1, 1)
+    static func white(shade: Float32) -> Color { Color(shade, shade, shade, 1) }
 }

@@ -9,39 +9,37 @@ import MetalKit
 import simd
 import Algorithms
 
+typealias Color = SIMD4<Float32>
+typealias Point = SIMD2<Float32>
+
 struct Vertex {
-    let position: SIMD2<Float32>
+    let position: Point
     private let padding =  (Float32(0.0), Float32(0.0))
-    let color: SIMD4<Float32>
+    let color: Color
 
     static var lenght: Int { 32 }
 }
 
-
-func triangle(_ a: SIMD2<Float32>, _ b: SIMD2<Float32>, _ c: SIMD2<Float32>) -> [Vertex] {
-    let color = SIMD4<Float32>(0, 0, 1, 1)
-    let secondColor = SIMD4<Float32>(0, 1, 1, 1)
+func triangle(_ a: Point, _ b: Point, _ c: Point, color: Color) -> [Vertex] {
     return [Vertex(position: a, color: color),
-            Vertex(position: b, color: secondColor),
-            Vertex(position: c, color: secondColor)]
+            Vertex(position: b, color: color),
+            Vertex(position: c, color: color)]
 }
 
 /// origin bottom left
-func square(origin: SIMD2<Float32>, size: Float32) -> Square {
-    let a = SIMD2<Float32>(origin.x, origin.y)
-    let b = SIMD2<Float32>(origin.x, origin.y + size)
-    let c = SIMD2<Float32>(origin.x + size, origin.y)
-    let d = SIMD2<Float32>(origin.x + size, origin.y + size)
+func square(origin: Point, size: Float32, color: Color) -> Square {
+    let a = Point(origin.x, origin.y)
+    let b = Point(origin.x, origin.y + size)
+    let c = Point(origin.x + size, origin.y)
+    let d = Point(origin.x + size, origin.y + size)
 
-    let square: [Vertex] = triangle(a, b, c) + triangle(b, c, d)
+    let square: [Vertex] = triangle(a, b, c, color: color) + triangle(b, c, d, color: color)
     return Square(vertices: square)
 }
 
 struct Square {
     let vertices: [Vertex]
 }
-
-var screenDimensions = (width: Int(160), height: Int(144))
 
 let pixelSize: Float32 = 10
 
@@ -74,13 +72,13 @@ class Renderer: NSObject, MTKViewDelegate {
     }
 
     func draw(in view: MTKView) {
-        debugPrint("\(#function)")
-        // Worked with tuples
+//        debugPrint("\(#function)")
         var squares: [Square] = []
         let offset = (x: Float32(-640), y: Float32(-288))
-        for w in 0..<screenDimensions.width {
-            for h in 0..<screenDimensions.height {
-                squares.append(square(origin: offset.x + SIMD2<Float32>(Float32(h) * pixelSize, offset.y + Float32(w) * pixelSize), size: pixelSize))
+        for w in 0..<screenWidth {
+            for h in 0..<screenHeight {
+                squares.append(square(origin: offset.x + Point(Float32(w) * pixelSize, offset.y + Float32(h) * pixelSize),
+                                      size: pixelSize, color: screen[w+h*screenHeight]))
             }
         }
 
