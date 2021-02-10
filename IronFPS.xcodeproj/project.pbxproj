@@ -25,7 +25,6 @@
 		0634EBC425D0BA710066A154 /* IronFPS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IronFPS.entitlements; sourceTree = "<group>"; };
 		0634EBCB25D0BAC00066A154 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		0634EBCF25D1DD3D0066A154 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
-		0634EBD325D1E3CE0066A154 /* IronFPS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "IronFPS-Bridging-Header.h"; sourceTree = "<group>"; };
 		0634EBD525D1E5000066A154 /* AAPLShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AAPLShaderTypes.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,12 +62,11 @@
 				0634EBBC25D0BA700066A154 /* ViewController.swift */,
 				0634EBCB25D0BAC00066A154 /* Renderer.swift */,
 				0634EBCF25D1DD3D0066A154 /* Shaders.metal */,
+				0634EBD525D1E5000066A154 /* AAPLShaderTypes.h */,
 				0634EBBE25D0BA710066A154 /* Assets.xcassets */,
 				0634EBC025D0BA710066A154 /* Main.storyboard */,
 				0634EBC325D0BA710066A154 /* Info.plist */,
 				0634EBC425D0BA710066A154 /* IronFPS.entitlements */,
-				0634EBD325D1E3CE0066A154 /* IronFPS-Bridging-Header.h */,
-				0634EBD525D1E5000066A154 /* AAPLShaderTypes.h */,
 			);
 			path = IronFPS;
 			sourceTree = "<group>";

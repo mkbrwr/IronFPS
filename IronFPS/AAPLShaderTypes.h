@@ -3,6 +3,7 @@ See LICENSE folder for this sample’s licensing information.
 
 Abstract:
 Header containing types and enum constants shared between Metal shaders and C/ObjC source
+But now this types are not shared, and instead Swift types with same memory layout are used.
 */
 
 #ifndef AAPLShaderTypes_h
