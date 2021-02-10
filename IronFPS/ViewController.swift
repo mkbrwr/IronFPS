@@ -71,7 +71,7 @@ class ViewController: NSViewController {
             fPlayerA += 0.1
         default: break
         }
-        return event
+        return nil
     })
 
 //    var keyUp = NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: { event in
