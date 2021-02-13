@@ -7,7 +7,6 @@
 
 import MetalKit
 import simd
-import Algorithms
 
 typealias Color = SIMD4<Float32>
 typealias Point = SIMD2<Float32>

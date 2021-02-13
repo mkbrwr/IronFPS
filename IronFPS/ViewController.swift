@@ -23,20 +23,20 @@ var depth = 16.0
 
 let map = [
     "#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".","#","#","#",".",".",".",".",".","#","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",
+    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
+    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
+    "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
+    "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
+    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
+    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
+    "#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#",
+    "#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"
 ]
 
@@ -63,7 +63,7 @@ class ViewController: NSViewController {
     var mtkView: MTKView!
 
     var keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { event in
-        debugPrint(event)
+//        debugPrint(event)
         switch Move(keyCode: event.keyCode) {
         case .left:
             fPlayerA -= 0.1
@@ -72,6 +72,9 @@ class ViewController: NSViewController {
         case .foreward:
             playerX += sin(fPlayerA) * 0.5
             playerY += cos(fPlayerA) * 0.5
+        case .backward:
+            playerX -= sin(fPlayerA) * 0.5
+            playerY -= cos(fPlayerA) * 0.5
         default: break
         }
         return nil
@@ -135,24 +138,14 @@ class ViewController: NSViewController {
             let ceiling = Int(Double(screenHeight) / 2.0 - Double(screenHeight) / Double(distanceToWall))
             let floor = screenHeight - ceiling
 
-            var color: Color
-            switch distanceToWall {
-            case let x where x <= depth / 4:
-                color = Color.white(shade: 1)
-            case let x where x <= depth / 3:
-                color = Color.white(shade: 0.85)
-            case let x where x <= depth / 2:
-                color = Color.white(shade: 0.65)
-            case let x where x < depth:
-                color = Color.white(shade: 0.51)
-            default:
-                color = .black
-            }
+            let wall = Color.white(shade: Float32( depth / distanceToWall - 1 ))
+
             for y in 0..<screenHeight {
                 if y <= ceiling {
-                    screen[y * screenWidth + x] = .black
+                    let b = 1.0 - (Float32(y) - Float32(screenHeight) / 2.0) / ( Float32(screenHeight) / 2.0 )
+                    screen[y * screenWidth + x] = .white(shade: b - 1.0 )
                 } else if y > ceiling && y <= floor {
-                    screen[y * screenWidth + x] = color
+                    screen[y * screenWidth + x] = wall
                 } else {
                     screen[y * screenWidth + x] = .sky
                 }
