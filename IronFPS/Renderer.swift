@@ -6,7 +6,6 @@
 //
 
 import MetalKit
-import simd
 
 typealias Color = SIMD4<Float32>
 typealias Point = SIMD2<Float32>
@@ -25,22 +24,18 @@ func triangle(_ a: Point, _ b: Point, _ c: Point, color: Color) -> [Vertex] {
             Vertex(position: c, color: color)]
 }
 
-/// origin bottom left
-func square(origin: Point, size: Float32, color: Color) -> Square {
-    let a = Point(origin.x, origin.y)
-    let b = Point(origin.x, origin.y + size)
-    let c = Point(origin.x + size, origin.y)
-    let d = Point(origin.x + size, origin.y + size)
-
-    let square: [Vertex] = triangle(a, b, c, color: color) + triangle(b, c, d, color: color)
-    return Square(vertices: square)
-}
-
 struct Square {
     let vertices: [Vertex]
-}
 
-let pixelSize: Float32 = 10
+    // Origin bottom left
+    init(origin: Point, size: Float32, color: Color) {
+        let a = Point(origin.x, origin.y)
+        let b = Point(origin.x, origin.y + size)
+        let c = Point(origin.x + size, origin.y)
+        let d = Point(origin.x + size, origin.y + size)
+        vertices = triangle(a, b, c, color: color) + triangle(b, c, d, color: color)
+    }
+}
 
 class Renderer: NSObject, MTKViewDelegate {
     let device: MTLDevice
@@ -71,14 +66,14 @@ class Renderer: NSObject, MTKViewDelegate {
     }
 
     func draw(in view: MTKView) {
-//        debugPrint("\(#function)")
         var squares: [Square] = []
+        squares.reserveCapacity(screenWidth * screenHeight)
         let offset = (x: Float32(-640), y: Float32(-288))
         for w in 0..<screenWidth {
             for h in 0..<screenHeight {
                 let origin = offset.x + Point(Float32(w) * pixelSize, offset.y + Float32(h) * pixelSize)
                 let color = screen[h*screenWidth+w]
-                squares.append(square(origin: origin,
+                squares.append(Square(origin: origin,
                                       size: pixelSize,
                                       color: color))
             }
@@ -128,5 +123,37 @@ class Renderer: NSObject, MTKViewDelegate {
         debugPrint("\(#function) new size: \(size)")
         viewportSize.0 = UInt32(size.width)
         viewportSize.1 = UInt32(size.height)
+    }
+}
+
+enum Sprite {
+    case wall
+
+    func sampleAt(x: Float32, y: Float32) -> Color {
+        SpriteStorage.single.sampleAt(x, y)
+    }
+}
+
+class SpriteStorage {
+    static let single = SpriteStorage()
+
+    let data: Data!
+    let width = 64
+    let height = 64
+
+    init() {
+        let bitmap = Bundle.main.url(forResource: "Brick_64", withExtension: "data")!
+        data = try! Data(contentsOf: bitmap)
+    }
+
+    func sampleAt(_ x: Float32, _ y: Float32) -> Color {
+        let textureX = Int(Float(width - 1)  * x)
+        let textureY = Int(Float(height - 1) * y)
+        let textureIdx = (textureX + textureY * width) * 4
+        let R = data[textureIdx+0]
+        let G = data[textureIdx+1]
+        let B = data[textureIdx+2]
+        let A = data[textureIdx+3]
+        return Color(Float32(R)/255.0, Float32(G)/255.0, Float32(B)/255.0, 1.0)
     }
 }

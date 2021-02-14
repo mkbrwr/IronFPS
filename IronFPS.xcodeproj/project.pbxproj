@@ -13,6 +13,7 @@
 		0634EBC225D0BA710066A154 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0634EBC025D0BA710066A154 /* Main.storyboard */; };
 		0634EBCC25D0BAC00066A154 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634EBCB25D0BAC00066A154 /* Renderer.swift */; };
 		0634EBD025D1DD3D0066A154 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0634EBCF25D1DD3D0066A154 /* Shaders.metal */; };
+		06941D3C25D9CF46000B6D3A /* Brick_64.data in Resources */ = {isa = PBXBuildFile; fileRef = 06941D3B25D9CF46000B6D3A /* Brick_64.data */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		0634EBCB25D0BAC00066A154 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		0634EBCF25D1DD3D0066A154 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		0634EBD525D1E5000066A154 /* AAPLShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AAPLShaderTypes.h; sourceTree = "<group>"; };
+		06941D3B25D9CF46000B6D3A /* Brick_64.data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Brick_64.data; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				0634EBCB25D0BAC00066A154 /* Renderer.swift */,
 				0634EBCF25D1DD3D0066A154 /* Shaders.metal */,
 				0634EBD525D1E5000066A154 /* AAPLShaderTypes.h */,
+				06941D3B25D9CF46000B6D3A /* Brick_64.data */,
 				0634EBBE25D0BA710066A154 /* Assets.xcassets */,
 				0634EBC025D0BA710066A154 /* Main.storyboard */,
 				0634EBC325D0BA710066A154 /* Info.plist */,
@@ -128,6 +131,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06941D3C25D9CF46000B6D3A /* Brick_64.data in Resources */,
 				0634EBBF25D0BA710066A154 /* Assets.xcassets in Resources */,
 				0634EBC225D0BA710066A154 /* Main.storyboard in Resources */,
 			);
