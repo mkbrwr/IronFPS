@@ -14,14 +14,32 @@ let pixelSize: Float = 4
 
 var playerX = 8.0
 var playerY = 8.0
-var fPlayerA = 0.0
+var playerA = 0.0
 
 var mapHeight = 32
 var mapWidht = 32
 
-var fFOV = Double.pi / 6.0
+var FOV = Double.pi / 6.0
 var depth = 16.0
+var stepSize = 0.05
 
+var screen = Array<Color>.init(repeating: .black, count: screenWidth * screenHeight)
+
+let windowBackground = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
+
+struct Object {
+    let x: Double
+    let y: Double
+    let sprite: Sprite
+}
+
+var objects = [Object(x:  8.5, y: 8.5, sprite: .barrel),
+               Object(x:  7.5, y: 7.5, sprite: .barrel),
+               Object(x: 10.5, y: 3.5, sprite: .barrel)]
+
+var depthBuffer = Array<Double>(repeating: 0.0, count: screenWidth)
+
+// TODO: Show a small map on the side, and also display rays that are being cast into the world.
 let map = [
     "#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",
     "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
@@ -40,8 +58,8 @@ let map = [
     "#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#","#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#",
     "#","#","#","#","#","#","#","#","#","#","#",".",".","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",".","#","#","#",
     "#","#","#","#","#","#","#","#","#","#","#",".",".","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",".","#","#","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
+    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
+    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
     "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#","#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
     "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#","#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
     "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
@@ -73,26 +91,24 @@ enum Move {
     }
 }
 
-var screen = Array<Color>.init(repeating: .black, count: screenWidth * screenHeight)
-
-let windowBackground = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
 
 class ViewController: NSViewController {
     var renderer: Renderer!
     var mtkView: MTKView!
 
+    // TODO: - Improve controls so that turning does not stop player from moving forward
     var keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { event in
         switch Move(keyCode: event.keyCode) {
         case .turnLeft:
-            fPlayerA -= 0.1
+            playerA -= 0.1
         case .turnRight:
-            fPlayerA += 0.1
+            playerA += 0.1
         case .foreward:
-            playerX += sin(fPlayerA) * 0.5
-            playerY += cos(fPlayerA) * 0.5
+            playerX += sin(playerA) * 0.5
+            playerY += cos(playerA) * 0.5
         case .backward:
-            playerX -= sin(fPlayerA) * 0.5
-            playerY -= cos(fPlayerA) * 0.5
+            playerX -= sin(playerA) * 0.5
+            playerY -= cos(playerA) * 0.5
             // TODO: - Fix strafing
 //        case .strafeLeft:
 //            playerX += sin(fPlayerA) * 0.5
@@ -127,13 +143,13 @@ class ViewController: NSViewController {
     }
 
     func runLoop() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(33)) { [unowned self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) { [unowned self] in
             self.runLoop()
             mtkView.setNeedsDisplay(mtkView.frame)
         }
         for x in 0..<screenWidth {
             // For each column, calculate the projected ray angle into world space
-            let rayAngle = (fPlayerA - fFOV / 2.0) + (Double(x) / Double(screenWidth)) * fFOV;
+            let rayAngle = (playerA - FOV / 2.0) + (Double(x) / Double(screenWidth)) * FOV;
 
             var distanceToWall = 0.0
             var hitWall = false
@@ -144,7 +160,7 @@ class ViewController: NSViewController {
             var sampleX = 0.0 // How far across the texture the point should be sampled.
 
             while !hitWall && distanceToWall < depth {
-                distanceToWall += 0.1
+                distanceToWall += stepSize
 
                 let testX = Int(playerX + eyeX * distanceToWall)
                 let testY = Int(playerY + eyeY * distanceToWall)
@@ -188,20 +204,77 @@ class ViewController: NSViewController {
             let ceiling = Int(Double(screenHeight) / 2.0 - Double(screenHeight) / Double(distanceToWall))
             let floor = screenHeight - ceiling
 
+            // Update Depth Buffer
+            depthBuffer[x] = distanceToWall
+
             let shade = Float32( depth / distanceToWall - 1 )
             for y in 0..<screenHeight {
-                if y <= ceiling { // Floor
-                    let b = 1.0 - (Float32(y) - Float32(screenHeight) / 2.0) / ( Float32(screenHeight) / 2.0 )
-                    screen[y * screenWidth + x] = .darkGreen(shade: b - 1.0 )
+                if y <= ceiling { // Sky
+                    draw(x, y, color: .sky)
                 } else if y > ceiling && y <= floor { // Wall
                     let sampleY = (Float32(y) - Float32(ceiling)) / (Float32(floor) - Float32(ceiling))
                     let color = Sprite.wall.sampleAt(x: Float32(sampleX), y: sampleY).shaded(shade)
-                    screen[y * screenWidth + x] = color
-                } else { // Sky
-                    screen[y * screenWidth + x] = .sky
+                    draw(x, y, color: color)
+                } else { // Floor
+                    let b = (Float32(y) - Float32(screenHeight) / 2.0) / ( Float32(screenHeight) / 2.0 )
+                    draw(x, y, color: .darkGreen(shade: b ))
                 }
             }
         }
+
+        // Update and Draw Objects
+        for object in objects {
+            // Can the object be seen by the player ?
+            let vecX = object.x - playerX
+            let vecY = object.y - playerY
+            let distanceFromPlayer = sqrt(vecX * vecX + vecY * vecY)
+
+            // Calculate angle between lamp and players feet, and players looking direction
+            // to determine if the object is in the players field of view
+            let eyeX = sin(playerA)
+            let eyeY = cos(playerA)
+            var objectAngle = atan2(eyeY, eyeX) - atan2(vecY, vecX)
+
+            if objectAngle < -.pi {
+                objectAngle += 2.0 * .pi
+            }
+            if objectAngle > .pi {
+                objectAngle -= 2.0 * .pi
+            }
+
+            let inPlayerFOV = abs(objectAngle) < FOV / 2.0
+
+            if inPlayerFOV && distanceFromPlayer >= 0.5 && distanceFromPlayer < depth {
+                let objectCeiling = Double(screenHeight) / 2.0 - Double(screenHeight) / distanceFromPlayer
+                let objectFloor = Double(screenHeight) - objectCeiling
+                let objectHeight = (objectFloor - objectCeiling)
+                let objectAspectRatio = 351.0/222.0
+                let objectWidth = objectHeight / objectAspectRatio
+
+                let middleOfObject = (0.5 * (objectAngle / (FOV / 2.0)) + 0.5) * Double(screenWidth)
+
+                for lx in stride(from: 0.0, to: objectWidth, by: 1.0) {
+                    for ly in stride(from: 0.0, to: objectHeight, by: 1.0) {
+                        let sampleX = lx / objectWidth
+                        let sampleY = ly / objectHeight
+
+                        let color = Sprite.barrel.sampleAt(x: Float32(sampleX), y: Float32(sampleY))
+                        let objectColumn = middleOfObject + lx - (objectWidth / 2.0)
+                        if objectColumn >= 0 && objectColumn < Double(screenWidth) {
+                            if depthBuffer[Int(objectColumn)] >= distanceFromPlayer && color.w != 0.0 {
+                                draw(Int(objectColumn), Int(objectCeiling + ly), color: color)
+                                depthBuffer[Int(objectColumn)] = distanceFromPlayer
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    func draw(_ x: Int, _ y: Int, color: Color) {
+        screen[y * screenWidth + x] = color
     }
 }
 

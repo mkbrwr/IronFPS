@@ -52,6 +52,9 @@ class Renderer: NSObject, MTKViewDelegate {
     var viewportSize: (UInt32, UInt32) = (0, 0)
     var pipelineState: MTLRenderPipelineState!
 
+    let offset = (x: Float32(-640), y: Float32(0))
+    let screenBuffer: UnsafeMutablePointer<Square>!
+
     init?(metalKitView: MTKView) {
         device = metalKitView.device!
 
@@ -73,7 +76,7 @@ class Renderer: NSObject, MTKViewDelegate {
 
         var squares: [Square] = []
         squares.reserveCapacity(screenWidth * screenHeight)
-        for h in 0..<screenHeight {
+        for h in (0..<screenHeight).reversed() {
             for w in 0..<screenWidth {
                 let origin = offset.x + Point(Float32(w) * pixelSize, offset.y + Float32(h) * pixelSize)
                 squares.append(Square(origin: origin,
@@ -87,9 +90,6 @@ class Renderer: NSObject, MTKViewDelegate {
         screenBuffer.initialize(from: &squares, count: squares.count)
         super.init()
     }
-
-    let offset = (x: Float32(-640), y: Float32(-288))
-    let screenBuffer: UnsafeMutablePointer<Square>!
 
     func draw(in view: MTKView) {
         for h in 0..<screenHeight {
@@ -143,7 +143,6 @@ class Renderer: NSObject, MTKViewDelegate {
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        debugPrint("\(#function) new size: \(size)")
         viewportSize.0 = UInt32(size.width)
         viewportSize.1 = UInt32(size.height)
     }
