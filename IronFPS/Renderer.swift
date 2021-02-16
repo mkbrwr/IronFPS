@@ -13,7 +13,8 @@ typealias Point = SIMD2<Float32>
 struct Vertex {
     let position: Point
     private let padding =  (Float32(0.0), Float32(0.0))
-    let color: Color
+    // TODO: change to let
+    var color: Color
 
     static var lenght: Int { 32 }
 }
@@ -25,7 +26,7 @@ func triangle(_ a: Point, _ b: Point, _ c: Point, color: Color) -> [Vertex] {
 }
 
 struct Square {
-    let vertices: [Vertex]
+    let vertices = UnsafeMutablePointer<Vertex>.allocate(capacity: 3 * 2)
 
     // Origin bottom left
     init(origin: Point, size: Float32, color: Color) {
@@ -33,7 +34,14 @@ struct Square {
         let b = Point(origin.x, origin.y + size)
         let c = Point(origin.x + size, origin.y)
         let d = Point(origin.x + size, origin.y + size)
-        vertices = triangle(a, b, c, color: color) + triangle(b, c, d, color: color)
+        let triangles = triangle(a, b, c, color: color) + triangle(b, c, d, color: color)
+        vertices.initialize(from: triangles, count: triangles.count)
+    }
+
+    func setColor(_ color: Color) {
+        for vertexIdx in 0..<6 {
+            vertices[vertexIdx].color = color
+        }
     }
 }
 
@@ -62,20 +70,32 @@ class Renderer: NSObject, MTKViewDelegate {
         pipelineState = try! device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
 
         commandQueue = device.makeCommandQueue()!
+
+        var squares: [Square] = []
+        squares.reserveCapacity(screenWidth * screenHeight)
+        for h in 0..<screenHeight {
+            for w in 0..<screenWidth {
+                let origin = offset.x + Point(Float32(w) * pixelSize, offset.y + Float32(h) * pixelSize)
+                squares.append(Square(origin: origin,
+                                      size: pixelSize,
+                                      color: .white))
+            }
+        }
+
+        let screenResolution = screenWidth * screenHeight
+        screenBuffer = UnsafeMutablePointer<Square>.allocate(capacity: screenResolution)
+        screenBuffer.initialize(from: &squares, count: squares.count)
         super.init()
     }
 
+    let offset = (x: Float32(-640), y: Float32(-288))
+    let screenBuffer: UnsafeMutablePointer<Square>!
+
     func draw(in view: MTKView) {
-        var squares: [Square] = []
-        squares.reserveCapacity(screenWidth * screenHeight)
-        let offset = (x: Float32(-640), y: Float32(-288))
-        for w in 0..<screenWidth {
-            for h in 0..<screenHeight {
-                let origin = offset.x + Point(Float32(w) * pixelSize, offset.y + Float32(h) * pixelSize)
-                let color = screen[h*screenWidth+w]
-                squares.append(Square(origin: origin,
-                                      size: pixelSize,
-                                      color: color))
+        for h in 0..<screenHeight {
+            for w in 0..<screenWidth {
+                let color = screen[h * screenWidth + w]
+                screenBuffer[h * screenWidth + w].setColor(color)
             }
         }
 
@@ -100,19 +120,22 @@ class Renderer: NSObject, MTKViewDelegate {
 
         renderEncoder.setRenderPipelineState(pipelineState)
 
+        for h in 0..<screenHeight {
+            for w in 0..<screenWidth {
+                let square = screenBuffer[h * screenWidth + w]
+                // Pass in the paramter data.
+                renderEncoder.setVertexBytes(square.vertices,
+                                             length: Vertex.lenght * 6,
+                                             index: 0)
 
-        for square in squares {
-        var triangles = square.vertices
-        // Pass in the paramter data.
-        renderEncoder.setVertexBytes(&triangles,
-                                     length: Vertex.lenght * triangles.count,
-                                     index: 0)
-        renderEncoder.setVertexBytes(&viewportSize, length: 16, index: 1)
+                renderEncoder.setVertexBytes(&viewportSize, length: 16, index: 1)
 
-        // Draw the triangle.
-        renderEncoder.drawPrimitives(type: .triangle,
-                                     vertexStart: 0,
-                                     vertexCount: triangles.count)
+                // Draw the triangle.
+                renderEncoder.drawPrimitives(type: .triangle,
+                                             vertexStart: 0,
+                                             vertexCount: 6)
+
+            }
         }
         renderEncoder.endEncoding()
         commandBuffer.present(view.currentDrawable!)
