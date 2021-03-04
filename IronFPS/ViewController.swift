@@ -8,9 +8,8 @@
 import Cocoa
 import MetalKit
 
-var screenWidth = 320
-var screenHeight = 288
-let pixelSize: Float = 4
+var screenWidth = 1240
+var screenHeight = 1024
 
 var playerX = 8.0
 var playerY = 8.0
@@ -23,7 +22,7 @@ var FOV = Double.pi / 6.0
 var depth = 16.0
 var stepSize = 0.05
 
-var screen = Array<Color>.init(repeating: .black, count: screenWidth * screenHeight)
+var screen = Array<SIMD4<UInt8>>.init(repeating: .zero, count: screenWidth * screenHeight)
 
 let windowBackground = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
 
@@ -134,7 +133,7 @@ class ViewController: NSViewController {
         mtkView.device = MTLCreateSystemDefaultDevice()
         mtkView.clearColor = windowBackground
 
-        renderer = Renderer(metalKitView: mtkView)!
+        renderer = Renderer(mtkView: mtkView)
 
         renderer.mtkView(mtkView, drawableSizeWillChange: mtkView.drawableSize)
 
@@ -274,11 +273,14 @@ class ViewController: NSViewController {
     }
 
     func draw(_ x: Int, _ y: Int, color: Color) {
-        screen[y * screenWidth + x] = color
+        screen[y * screenWidth + x] = color.brga()
     }
 }
 
+typealias Color = SIMD4<Float32>
+
 extension Color {
+    // RGBA
     static let sky = Color(0.1, 0.0, 0.5, 1.0)
     static let lightGray = Color(0.5, 0.5, 0.5, 1.0)
     static let gray = Color(0.5, 0.5, 0.5, 1.0)
@@ -287,10 +289,15 @@ extension Color {
     static let black =  Color(0, 0, 0, 1)
     static let white = Color(1, 1, 1, 1)
     static func white(shade: Float32) -> Color { Color(shade, shade, shade, 1) }
-    static func darkGreen(shade: Float32) -> Color { Color(0.0, 0.2*shade, 0.0, 1.0) }
+    static func darkGreen(shade: Float32) -> Color { Color(0.0, 0.2 * shade, 0.0, 1.0) }
 
     func shaded(_ shade: Float32) -> Color {
         let shade = Swift.min(shade, 1)
         return Color(x*shade, y*shade, z*shade, w)
+    }
+
+    // rgba
+    func brga() -> SIMD4<UInt8> {
+        return SIMD4<UInt8>(UInt8(self.z * 255), UInt8(self.y * 255), UInt8(self.x * 255), UInt8(self.w * 255) )
     }
 }

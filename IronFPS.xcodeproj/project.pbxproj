@@ -28,7 +28,7 @@
 		0634EBC425D0BA710066A154 /* IronFPS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IronFPS.entitlements; sourceTree = "<group>"; };
 		0634EBCB25D0BAC00066A154 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		0634EBCF25D1DD3D0066A154 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
-		0634EBD525D1E5000066A154 /* AAPLShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AAPLShaderTypes.h; sourceTree = "<group>"; };
+		0634EBD525D1E5000066A154 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		06941D3F25DBA4A7000B6D3A /* Brick_512.data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Brick_512.data; sourceTree = "<group>"; };
 		06941D5625DBDDAC000B6D3A /* Sprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sprite.swift; sourceTree = "<group>"; };
 		06941D7C25DC386A000B6D3A /* Barrel_222x351.data */ = {isa = PBXFileReference; lastKnownFileType = file; path = Barrel_222x351.data; sourceTree = "<group>"; };
@@ -69,7 +69,7 @@
 				0634EBCB25D0BAC00066A154 /* Renderer.swift */,
 				06941D5625DBDDAC000B6D3A /* Sprite.swift */,
 				0634EBCF25D1DD3D0066A154 /* Shaders.metal */,
-				0634EBD525D1E5000066A154 /* AAPLShaderTypes.h */,
+				0634EBD525D1E5000066A154 /* ShaderTypes.h */,
 				06941D3F25DBA4A7000B6D3A /* Brick_512.data */,
 				06941D7C25DC386A000B6D3A /* Barrel_222x351.data */,
 				0634EBBE25D0BA710066A154 /* Assets.xcassets */,
@@ -305,6 +305,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronFPS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = IronFPS/ShaderTypes.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -326,6 +327,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronFPS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = IronFPS/ShaderTypes.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
