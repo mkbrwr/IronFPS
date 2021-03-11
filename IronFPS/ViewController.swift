@@ -267,7 +267,7 @@ class ViewController: NSViewController {
 
             let inPlayerFOV = abs(objectAngle) < FOV / 2.0
 
-            if inPlayerFOV && distanceFromPlayer >= 0.5 && distanceFromPlayer < depth {
+            if inPlayerFOV && distanceFromPlayer >= 2 && distanceFromPlayer < depth {
                 let objectCeiling = Double(screenHeight) / 2.0 - Double(screenHeight) / distanceFromPlayer
                 let objectFloor = Double(screenHeight) - objectCeiling
                 let objectHeight = (objectFloor - objectCeiling)
