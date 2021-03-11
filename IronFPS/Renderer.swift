@@ -11,9 +11,6 @@ import MetalKit
 
 class Renderer: NSObject, MTKViewDelegate {
 
-    let x: Vertex = .init(position: vector2(1.0, 2.0),
-                          textureCoordinate: vector2(1.0, 2.0))
-
     var device: MTLDevice!
     var pipelineState: MTLRenderPipelineState!
     var commandQueue: MTLCommandQueue!
@@ -23,8 +20,6 @@ class Renderer: NSObject, MTKViewDelegate {
     var viewportSize: vector_uint2 = .zero
 
     func makeTextureFromScreenBytes() -> MTLTexture {
-//        let image = AAPLImage(tgaFileAtLocation: url)!
-//
         let textureDescriptor = MTLTextureDescriptor()
 
         // Indicate that each pixel has a blue, green, red, and alpha channel, where each channel is
@@ -45,9 +40,7 @@ class Renderer: NSObject, MTKViewDelegate {
                                size: MTLSize(width: screenWidth, height: screenHeight, depth: 1))
 
         // Copy the bytes from the data object into the texture
-
-        texture.replace(region: region, mipmapLevel: 0, withBytes: &screen, bytesPerRow: Int(bytesPerRow))
-
+        texture.replace(region: region, mipmapLevel: 0, withBytes: &screen, bytesPerRow: bytesPerRow)
 
         return texture
     }
@@ -56,8 +49,6 @@ class Renderer: NSObject, MTKViewDelegate {
         super.init()
 
         self.device = mtkView.device!
-
-
 
         // Set up a simple MTLBuffer with vertices which include texture coordinates
         var quadVertices: [Vertex] = [

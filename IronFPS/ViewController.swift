@@ -8,8 +8,13 @@
 import Cocoa
 import MetalKit
 
+#if DEBUG
+var screenWidth = 320
+var screenHeight = 288
+#else
 var screenWidth = 1240
 var screenHeight = 1024
+#endif
 
 var playerX = 8.0
 var playerY = 8.0
