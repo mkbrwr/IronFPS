@@ -100,37 +100,14 @@ class ViewController: NSViewController {
     var renderer: Renderer!
     var mtkView: MTKView!
 
-    // TODO: - Improve controls so that turning does not stop player from moving forward
-    var keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { event in
-        switch Move(keyCode: event.keyCode) {
-        case .turnLeft:
-            playerA -= 0.1
-        case .turnRight:
-            playerA += 0.1
-        case .foreward:
-            playerX += sin(playerA) * 0.5
-            playerY += cos(playerA) * 0.5
-        case .backward:
-            playerX -= sin(playerA) * 0.5
-            playerY -= cos(playerA) * 0.5
-            // TODO: - Fix strafing
-//        case .strafeLeft:
-//            playerX += sin(fPlayerA) * 0.5
-//            playerY -= cos(fPlayerA) * 0.5
-//        case .strafeRight:
-//            playerX -= sin(fPlayerA) * 0.5
-//            playerY += cos(fPlayerA) * 0.5
-        default: break
-        }
-        return nil
-    })
+    var moveCommands = Set<Move>()
 
-//    var keyUp = NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: { event in
-//        debugPrint(Move(keyCode: event.keyCode) ?? "WASD")
-//        return event
-//    })
+    var keyDown: Any?
+    var keyUp: Any?
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupKeypressEventMonitors()
         mtkView = MTKView(frame: view.frame)
         self.view = mtkView
 
@@ -146,8 +123,50 @@ class ViewController: NSViewController {
         self.runLoop()
     }
 
+    func setupKeypressEventMonitors() {
+        keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { event in
+            if let move = Move(keyCode: event.keyCode) {
+                self.moveCommands.insert(move)
+            }
+            return nil
+        })
+
+        keyUp = NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: { event in
+            if let move = Move(keyCode: event.keyCode) {
+                self.moveCommands.remove(move)
+            }
+            return nil
+        })
+    }
+
+    func updatePlayerPosition() {
+        moveCommands.forEach { move in
+            switch move {
+            case .turnLeft:
+                playerA -= 0.1
+            case .turnRight:
+                playerA += 0.1
+            case .foreward:
+                playerX += sin(playerA) * 0.5
+                playerY += cos(playerA) * 0.5
+            case .backward:
+                playerX -= sin(playerA) * 0.5
+                playerY -= cos(playerA) * 0.5
+            // FIXME: Strafing does not work for all playerA
+            // case .strafeLeft:
+            //     playerX += sin(playerA) * 0.5
+            //     playerY -= cos(playerA) * 0.5
+            // case .strafeRight:
+            //     playerX -= sin(playerA) * 0.5
+            //     playerY += cos(playerA) * 0.5
+            default: break
+            }
+        }
+    }
+
     func runLoop() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) { [unowned self] in
+        updatePlayerPosition()
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(33)) { [unowned self] in
             self.runLoop()
             mtkView.setNeedsDisplay(mtkView.frame)
         }
