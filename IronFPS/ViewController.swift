@@ -235,8 +235,8 @@ class ViewController: NSViewController {
                 if y <= ceiling { // Sky
                     draw(x, y, color: .sky)
                 } else if y > ceiling && y <= floor { // Wall
-                    let sampleY = (Float32(y) - Float32(ceiling)) / (Float32(floor) - Float32(ceiling))
-                    let color = Sprite.wall.sampleAt(x: Float32(sampleX), y: sampleY).shaded(shade)
+                    let sampleY = Double((Float32(y) - Float32(ceiling)) / (Float32(floor) - Float32(ceiling)))
+                    let color = Sprite.wall.sampleAt(x: sampleX, y: sampleY).shaded(shade)
                     draw(x, y, color: color)
                 } else { // Floor
                     let b = (Float32(y) - Float32(screenHeight) / 2.0) / ( Float32(screenHeight) / 2.0 )
@@ -281,10 +281,10 @@ class ViewController: NSViewController {
                         let sampleX = lx / objectWidth
                         let sampleY = ly / objectHeight
 
-                        let color = Sprite.barrel.sampleAt(x: Float32(sampleX), y: Float32(sampleY))
+                        let color = Sprite.barrel.sampleAt(x: sampleX, y: sampleY)
                         let objectColumn = middleOfObject + lx - (objectWidth / 2.0)
                         if objectColumn >= 0 && objectColumn < Double(screenWidth) {
-                            if depthBuffer[Int(objectColumn)] >= distanceFromPlayer && color.w != 0.0 {
+                            if depthBuffer[Int(objectColumn)] >= distanceFromPlayer && color.w != 0 {
                                 draw(Int(objectColumn), Int(objectCeiling + ly), color: color)
                                 depthBuffer[Int(objectColumn)] = distanceFromPlayer
                             }
@@ -297,31 +297,29 @@ class ViewController: NSViewController {
     }
 
     func draw(_ x: Int, _ y: Int, color: Color) {
-        screen[y * screenWidth + x] = color.brga()
+        screen[y * screenWidth + x] = color
     }
 }
 
-typealias Color = SIMD4<Float32>
+typealias Color = SIMD4<UInt8>
 
 extension Color {
-    // RGBA
-    static let sky = Color(0.1, 0.0, 0.5, 1.0)
-    static let lightGray = Color(0.5, 0.5, 0.5, 1.0)
-    static let gray = Color(0.5, 0.5, 0.5, 1.0)
-    static let darkGray = Color(0.2, 0.2, 0.2, 1.0)
-    static let darkGreen = Color(0.0, 0.2, 0.0, 1.0)
-    static let black =  Color(0, 0, 0, 1)
-    static let white = Color(1, 1, 1, 1)
-    static func white(shade: Float32) -> Color { Color(shade, shade, shade, 1) }
-    static func darkGreen(shade: Float32) -> Color { Color(0.0, 0.2 * shade, 0.0, 1.0) }
+    static let sky = Color(25, 0, 128, 255).brga()
+    static let lightGray = Color(128, 128, 128, 250).brga()
+    static let gray = Color(128, 128, 128, 255).brga()
+    static let darkGray = Color(52, 52, 52, 255).brga()
+    static let darkGreen = Color(0, 52, 255, 255).brga()
+    static let black =  Color(0, 0, 0, 255).brga()
+    static let white = Color(255, 255, 255, 255).brga()
+    static func white(shade: Float32) -> Color { white.shaded(shade) }
+    static func darkGreen(shade: Float32) -> Color { Color(0, UInt8(52 * shade), 0, 255) }
 
     func shaded(_ shade: Float32) -> Color {
         let shade = Swift.min(shade, 1)
-        return Color(x*shade, y*shade, z*shade, w)
+        return Color(UInt8(Float(x) * shade), UInt8(Float(y) * shade), UInt8(Float(z) * shade), w)
     }
 
-    // rgba
     func brga() -> SIMD4<UInt8> {
-        return SIMD4<UInt8>(UInt8(self.z * 255), UInt8(self.y * 255), UInt8(self.x * 255), UInt8(self.w * 255) )
+        return SIMD4<UInt8>(z, y, x, w)
     }
 }
