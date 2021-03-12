@@ -105,6 +105,9 @@ class ViewController: NSViewController {
     var keyDown: Any?
     var keyUp: Any?
 
+    let worldQueue = DispatchQueue(label: "IronFPS_Word_Queue",
+                                   qos: .userInteractive)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupKeypressEventMonitors()
@@ -120,7 +123,9 @@ class ViewController: NSViewController {
         renderer.mtkView(mtkView, drawableSizeWillChange: mtkView.drawableSize)
 
         mtkView.delegate = renderer
-        self.runLoop()
+        worldQueue.async {
+            self.runLoop()
+        }
     }
 
     func setupKeypressEventMonitors() {
@@ -165,11 +170,10 @@ class ViewController: NSViewController {
     }
 
     func runLoop() {
-        updatePlayerPosition()
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(33)) { [unowned self] in
-            self.runLoop()
-            mtkView.setNeedsDisplay(mtkView.frame)
+        DispatchQueue.main.async { [unowned self] in
+            self.mtkView.setNeedsDisplay(mtkView.frame)
         }
+        updatePlayerPosition()
         for x in 0..<screenWidth {
             // For each column, calculate the projected ray angle into world space
             let rayAngle = (playerA - FOV / 2.0) + (Double(x) / Double(screenWidth)) * FOV;
@@ -293,7 +297,7 @@ class ViewController: NSViewController {
                 }
             }
         }
-
+        runLoop()
     }
 
     func draw(_ x: Int, _ y: Int, color: Color) {
