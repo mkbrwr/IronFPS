@@ -123,9 +123,8 @@ class ViewController: NSViewController {
         renderer.mtkView(mtkView, drawableSizeWillChange: mtkView.drawableSize)
 
         mtkView.delegate = renderer
-        worldQueue.async {
-            self.runLoop()
-        }
+        let prepareFrame = DispatchWorkItem { [unowned self] in runLoop() }
+        worldQueue.async(execute: prepareFrame)
     }
 
     func setupKeypressEventMonitors() {
@@ -297,7 +296,9 @@ class ViewController: NSViewController {
                 }
             }
         }
-        runLoop()
+
+        let prepareFrame = DispatchWorkItem { [unowned self] in runLoop() }
+        worldQueue.async(execute: prepareFrame)
     }
 
     func draw(_ x: Int, _ y: Int, color: Color) {

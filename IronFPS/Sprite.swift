@@ -24,13 +24,15 @@ enum Sprite {
 class Wall {
     static let texture = Wall()
 
-    let data: Data!
+    var data = UnsafeMutablePointer<UInt8>.allocate(capacity: 512 * 512 * 3)
     let width = 512
     let height = 512
 
     init() {
         let bitmap = Bundle.main.url(forResource: "Brick_512", withExtension: "data")!
-        data = try! Data(contentsOf: bitmap)
+        let imageData = try! Data(contentsOf: bitmap)
+        data.initialize(repeating: 0, count: width * height)
+        imageData.copyBytes(to: data, count: imageData.count)
     }
 
     func sampleAt(_ x: Double, _ y: Double) -> Color {
