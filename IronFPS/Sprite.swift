@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import IronRenderer
 
 enum Sprite {
     case wall
@@ -69,4 +70,3 @@ class Barrel {
         return Color(B, G, R, A)
     }
 }
-

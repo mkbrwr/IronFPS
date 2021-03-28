@@ -6,30 +6,21 @@
 //
 
 import Cocoa
-import MetalKit
+import IronRenderer
 
-#if DEBUG
 var screenWidth = 320
 var screenHeight = 288
-#else
-var screenWidth = 1240
-var screenHeight = 1024
-#endif
 
 var playerX = 8.0
 var playerY = 8.0
 var playerA = 0.0
 
-var mapHeight = 32
-var mapWidht = 32
+var mapHeigth = 32
+var mapWidth = 32
 
 var FOV = Double.pi / 6.0
 var depth = 16.0
 var stepSize = 0.05
-
-var screen = Array<SIMD4<UInt8>>.init(repeating: .zero, count: screenWidth * screenHeight)
-
-let windowBackground = MTLClearColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
 
 struct Object {
     let x: Double
@@ -95,13 +86,10 @@ enum Move {
     }
 }
 
-
 class ViewController: NSViewController {
-    var renderer: Renderer!
-    var mtkView: MTKView!
+    var ironScreen: Screen!
 
     var moveCommands = Set<Move>()
-
     var keyDown: Any?
     var keyUp: Any?
 
@@ -111,18 +99,8 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupKeypressEventMonitors()
-        mtkView = MTKView(frame: view.frame)
-        self.view = mtkView
+        ironScreen = .init(with: self)
 
-        mtkView.enableSetNeedsDisplay = true
-        mtkView.device = MTLCreateSystemDefaultDevice()
-        mtkView.clearColor = windowBackground
-
-        renderer = Renderer(mtkView: mtkView)
-
-        renderer.mtkView(mtkView, drawableSizeWillChange: mtkView.drawableSize)
-
-        mtkView.delegate = renderer
         let prepareFrame = DispatchWorkItem { [unowned self] in runLoop() }
         worldQueue.async(execute: prepareFrame)
     }
@@ -170,7 +148,7 @@ class ViewController: NSViewController {
 
     func runLoop() {
         DispatchQueue.main.async { [unowned self] in
-            self.mtkView.setNeedsDisplay(mtkView.frame)
+            ironScreen.setNeedsDisplay()
         }
         updatePlayerPosition()
         for x in 0..<screenWidth {
@@ -192,12 +170,12 @@ class ViewController: NSViewController {
                 let testY = Int(playerY + eyeY * distanceToWall)
 
                 // Test if ray is out of bounds
-                if (testX < 0 || testX >= mapWidht || testY < 0 || testY >= mapHeight) {
+                if (testX < 0 || testX >= mapWidth || testY < 0 || testY >= mapHeigth) {
                     hitWall = true
                     distanceToWall = depth
                 } else {
                     // Ray is inbounds so test to see if the ray cell is a wall block
-                    if map[testY * mapWidht + testX] == "#" {
+                    if map[testY * mapWidth + testX] == "#" {
                         hitWall = true
 
                         // Determine where ray has hit wall. Break Block boundary
@@ -302,11 +280,10 @@ class ViewController: NSViewController {
     }
 
     func draw(_ x: Int, _ y: Int, color: Color) {
-        screen[y * screenWidth + x] = color
+//        screen[y * screenWidth + x] = color
+        ironScreen.draw(color: color, at: Position(y, x))
     }
 }
-
-typealias Color = SIMD4<UInt8>
 
 extension Color {
     static let sky = Color(25, 0, 128, 255).brga()

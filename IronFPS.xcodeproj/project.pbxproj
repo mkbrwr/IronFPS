@@ -11,12 +11,56 @@
 		0634EBBD25D0BA700066A154 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634EBBC25D0BA700066A154 /* ViewController.swift */; };
 		0634EBBF25D0BA710066A154 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0634EBBE25D0BA710066A154 /* Assets.xcassets */; };
 		0634EBC225D0BA710066A154 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0634EBC025D0BA710066A154 /* Main.storyboard */; };
-		0634EBCC25D0BAC00066A154 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634EBCB25D0BAC00066A154 /* Renderer.swift */; };
-		0634EBD025D1DD3D0066A154 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 0634EBCF25D1DD3D0066A154 /* Shaders.metal */; };
+		064906BB260FA3EC007C0663 /* IronRenderer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 064906B2260FA3EC007C0663 /* IronRenderer.framework */; };
+		064906C2260FA3EC007C0663 /* IronRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064906C1260FA3EC007C0663 /* IronRendererTests.swift */; };
+		064906C4260FA3EC007C0663 /* IronRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 064906B4260FA3EC007C0663 /* IronRenderer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		064906C7260FA3EC007C0663 /* IronRenderer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 064906B2260FA3EC007C0663 /* IronRenderer.framework */; };
+		064906C8260FA3EC007C0663 /* IronRenderer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 064906B2260FA3EC007C0663 /* IronRenderer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		064906D3260FA41D007C0663 /* Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064906D2260FA41D007C0663 /* Screen.swift */; };
+		064906D6260FA8D8007C0663 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634EBCB25D0BAC00066A154 /* Renderer.swift */; };
+		064906EB260FB10C007C0663 /* Shaders.metal in Resources */ = {isa = PBXBuildFile; fileRef = 0634EBCF25D1DD3D0066A154 /* Shaders.metal */; };
 		06941D4025DBA4A7000B6D3A /* Brick_512.data in Resources */ = {isa = PBXBuildFile; fileRef = 06941D3F25DBA4A7000B6D3A /* Brick_512.data */; };
 		06941D5725DBDDAC000B6D3A /* Sprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06941D5625DBDDAC000B6D3A /* Sprite.swift */; };
 		06941D7D25DC386A000B6D3A /* Barrel_222x351.data in Resources */ = {isa = PBXBuildFile; fileRef = 06941D7C25DC386A000B6D3A /* Barrel_222x351.data */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		064906BC260FA3EC007C0663 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0634EBAF25D0BA700066A154 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 064906B1260FA3EC007C0663;
+			remoteInfo = IronRenderer;
+		};
+		064906BE260FA3EC007C0663 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0634EBAF25D0BA700066A154 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0634EBB625D0BA700066A154;
+			remoteInfo = IronFPS;
+		};
+		064906C5260FA3EC007C0663 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0634EBAF25D0BA700066A154 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 064906B1260FA3EC007C0663;
+			remoteInfo = IronRenderer;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		064906C9260FA3EC007C0663 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				064906C8260FA3EC007C0663 /* IronRenderer.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0634EBB725D0BA700066A154 /* IronFPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IronFPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -28,7 +72,14 @@
 		0634EBC425D0BA710066A154 /* IronFPS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IronFPS.entitlements; sourceTree = "<group>"; };
 		0634EBCB25D0BAC00066A154 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		0634EBCF25D1DD3D0066A154 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
-		0634EBD525D1E5000066A154 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		064906B2260FA3EC007C0663 /* IronRenderer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IronRenderer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		064906B4260FA3EC007C0663 /* IronRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IronRenderer.h; sourceTree = "<group>"; };
+		064906B5260FA3EC007C0663 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		064906BA260FA3EC007C0663 /* IronRendererTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IronRendererTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		064906C1260FA3EC007C0663 /* IronRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IronRendererTests.swift; sourceTree = "<group>"; };
+		064906C3260FA3EC007C0663 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		064906D2260FA41D007C0663 /* Screen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screen.swift; sourceTree = "<group>"; };
+		064906E4260FAC16007C0663 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		06941D3F25DBA4A7000B6D3A /* Brick_512.data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Brick_512.data; sourceTree = "<group>"; };
 		06941D5625DBDDAC000B6D3A /* Sprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sprite.swift; sourceTree = "<group>"; };
 		06941D7C25DC386A000B6D3A /* Barrel_222x351.data */ = {isa = PBXFileReference; lastKnownFileType = file; path = Barrel_222x351.data; sourceTree = "<group>"; };
@@ -39,6 +90,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				064906C7260FA3EC007C0663 /* IronRenderer.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		064906AF260FA3EC007C0663 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		064906B7260FA3EC007C0663 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				064906BB260FA3EC007C0663 /* IronRenderer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,6 +116,8 @@
 			isa = PBXGroup;
 			children = (
 				0634EBB925D0BA700066A154 /* IronFPS */,
+				064906B3260FA3EC007C0663 /* IronRenderer */,
+				064906C0260FA3EC007C0663 /* IronRendererTests */,
 				0634EBB825D0BA700066A154 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,6 +126,8 @@
 			isa = PBXGroup;
 			children = (
 				0634EBB725D0BA700066A154 /* IronFPS.app */,
+				064906B2260FA3EC007C0663 /* IronRenderer.framework */,
+				064906BA260FA3EC007C0663 /* IronRendererTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,10 +137,7 @@
 			children = (
 				0634EBBA25D0BA700066A154 /* AppDelegate.swift */,
 				0634EBBC25D0BA700066A154 /* ViewController.swift */,
-				0634EBCB25D0BAC00066A154 /* Renderer.swift */,
 				06941D5625DBDDAC000B6D3A /* Sprite.swift */,
-				0634EBCF25D1DD3D0066A154 /* Shaders.metal */,
-				0634EBD525D1E5000066A154 /* ShaderTypes.h */,
 				06941D3F25DBA4A7000B6D3A /* Brick_512.data */,
 				06941D7C25DC386A000B6D3A /* Barrel_222x351.data */,
 				0634EBBE25D0BA710066A154 /* Assets.xcassets */,
@@ -80,7 +148,40 @@
 			path = IronFPS;
 			sourceTree = "<group>";
 		};
+		064906B3260FA3EC007C0663 /* IronRenderer */ = {
+			isa = PBXGroup;
+			children = (
+				064906B4260FA3EC007C0663 /* IronRenderer.h */,
+				064906B5260FA3EC007C0663 /* Info.plist */,
+				064906D2260FA41D007C0663 /* Screen.swift */,
+				0634EBCB25D0BAC00066A154 /* Renderer.swift */,
+				0634EBCF25D1DD3D0066A154 /* Shaders.metal */,
+				064906E4260FAC16007C0663 /* ShaderTypes.h */,
+			);
+			path = IronRenderer;
+			sourceTree = "<group>";
+		};
+		064906C0260FA3EC007C0663 /* IronRendererTests */ = {
+			isa = PBXGroup;
+			children = (
+				064906C1260FA3EC007C0663 /* IronRendererTests.swift */,
+				064906C3260FA3EC007C0663 /* Info.plist */,
+			);
+			path = IronRendererTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		064906AD260FA3EC007C0663 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				064906C4260FA3EC007C0663 /* IronRenderer.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		0634EBB625D0BA700066A154 /* IronFPS */ = {
@@ -90,15 +191,54 @@
 				0634EBB325D0BA700066A154 /* Sources */,
 				0634EBB425D0BA700066A154 /* Frameworks */,
 				0634EBB525D0BA700066A154 /* Resources */,
+				064906C9260FA3EC007C0663 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				064906C6260FA3EC007C0663 /* PBXTargetDependency */,
 			);
 			name = IronFPS;
 			productName = IronFPS;
 			productReference = 0634EBB725D0BA700066A154 /* IronFPS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		064906B1260FA3EC007C0663 /* IronRenderer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 064906CE260FA3EC007C0663 /* Build configuration list for PBXNativeTarget "IronRenderer" */;
+			buildPhases = (
+				064906AD260FA3EC007C0663 /* Headers */,
+				064906AE260FA3EC007C0663 /* Sources */,
+				064906AF260FA3EC007C0663 /* Frameworks */,
+				064906B0260FA3EC007C0663 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IronRenderer;
+			productName = IronRenderer;
+			productReference = 064906B2260FA3EC007C0663 /* IronRenderer.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		064906B9260FA3EC007C0663 /* IronRendererTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 064906CF260FA3EC007C0663 /* Build configuration list for PBXNativeTarget "IronRendererTests" */;
+			buildPhases = (
+				064906B6260FA3EC007C0663 /* Sources */,
+				064906B7260FA3EC007C0663 /* Frameworks */,
+				064906B8260FA3EC007C0663 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				064906BD260FA3EC007C0663 /* PBXTargetDependency */,
+				064906BF260FA3EC007C0663 /* PBXTargetDependency */,
+			);
+			name = IronRendererTests;
+			productName = IronRendererTests;
+			productReference = 064906BA260FA3EC007C0663 /* IronRendererTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -111,6 +251,14 @@
 				TargetAttributes = {
 					0634EBB625D0BA700066A154 = {
 						CreatedOnToolsVersion = 12.4;
+					};
+					064906B1260FA3EC007C0663 = {
+						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1240;
+					};
+					064906B9260FA3EC007C0663 = {
+						CreatedOnToolsVersion = 12.4;
+						TestTargetID = 0634EBB625D0BA700066A154;
 					};
 				};
 			};
@@ -128,6 +276,8 @@
 			projectRoot = "";
 			targets = (
 				0634EBB625D0BA700066A154 /* IronFPS */,
+				064906B1260FA3EC007C0663 /* IronRenderer */,
+				064906B9260FA3EC007C0663 /* IronRendererTests */,
 			);
 		};
 /* End PBXProject section */
@@ -144,6 +294,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		064906B0260FA3EC007C0663 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				064906EB260FB10C007C0663 /* Shaders.metal in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		064906B8260FA3EC007C0663 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -152,14 +317,47 @@
 			buildActionMask = 2147483647;
 			files = (
 				06941D5725DBDDAC000B6D3A /* Sprite.swift in Sources */,
-				0634EBD025D1DD3D0066A154 /* Shaders.metal in Sources */,
 				0634EBBD25D0BA700066A154 /* ViewController.swift in Sources */,
-				0634EBCC25D0BAC00066A154 /* Renderer.swift in Sources */,
 				0634EBBB25D0BA700066A154 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		064906AE260FA3EC007C0663 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				064906D6260FA8D8007C0663 /* Renderer.swift in Sources */,
+				064906D3260FA41D007C0663 /* Screen.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		064906B6260FA3EC007C0663 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				064906C2260FA3EC007C0663 /* IronRendererTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		064906BD260FA3EC007C0663 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 064906B1260FA3EC007C0663 /* IronRenderer */;
+			targetProxy = 064906BC260FA3EC007C0663 /* PBXContainerItemProxy */;
+		};
+		064906BF260FA3EC007C0663 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0634EBB625D0BA700066A154 /* IronFPS */;
+			targetProxy = 064906BE260FA3EC007C0663 /* PBXContainerItemProxy */;
+		};
+		064906C6260FA3EC007C0663 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 064906B1260FA3EC007C0663 /* IronRenderer */;
+			targetProxy = 064906C5260FA3EC007C0663 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		0634EBC025D0BA710066A154 /* Main.storyboard */ = {
@@ -291,6 +489,7 @@
 		0634EBC825D0BA710066A154 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = IronFPS/IronFPS.entitlements;
@@ -305,7 +504,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronFPS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = IronFPS/ShaderTypes.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -313,6 +512,7 @@
 		0634EBC925D0BA710066A154 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = IronFPS/IronFPS.entitlements;
@@ -327,8 +527,107 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronFPS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = IronFPS/ShaderTypes.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		064906CA260FA3EC007C0663 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = SZHXKE4BG2;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = IronRenderer/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronRenderer;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		064906CB260FA3EC007C0663 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = SZHXKE4BG2;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = IronRenderer/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronRenderer;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		064906CC260FA3EC007C0663 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = SZHXKE4BG2;
+				INFOPLIST_FILE = IronRendererTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronRendererTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IronFPS.app/Contents/MacOS/IronFPS";
+			};
+			name = Debug;
+		};
+		064906CD260FA3EC007C0663 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = SZHXKE4BG2;
+				INFOPLIST_FILE = IronRendererTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycompany.IronRendererTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IronFPS.app/Contents/MacOS/IronFPS";
 			};
 			name = Release;
 		};
@@ -349,6 +648,24 @@
 			buildConfigurations = (
 				0634EBC825D0BA710066A154 /* Debug */,
 				0634EBC925D0BA710066A154 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		064906CE260FA3EC007C0663 /* Build configuration list for PBXNativeTarget "IronRenderer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				064906CA260FA3EC007C0663 /* Debug */,
+				064906CB260FA3EC007C0663 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		064906CF260FA3EC007C0663 /* Build configuration list for PBXNativeTarget "IronRendererTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				064906CC260FA3EC007C0663 /* Debug */,
+				064906CD260FA3EC007C0663 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

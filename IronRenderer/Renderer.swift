@@ -19,6 +19,13 @@ class Renderer: NSObject, MTKViewDelegate {
     var numVertices: Int!
     var viewportSize: vector_uint2 = .zero
 
+    let screenWidth: Int
+    let screenHeight: Int
+
+    var screen: Screen!
+
+    var pixels: Array<SIMD4<UInt8>>?
+
     func makeTextureFromScreenBytes() -> MTLTexture {
         let textureDescriptor = MTLTextureDescriptor()
 
@@ -39,13 +46,19 @@ class Renderer: NSObject, MTKViewDelegate {
         let region = MTLRegion(origin: MTLOrigin(x: 0, y: 0, z: 0),
                                size: MTLSize(width: screenWidth, height: screenHeight, depth: 1))
 
+
+        if var p = pixels {
         // Copy the bytes from the data object into the texture
-        texture.replace(region: region, mipmapLevel: 0, withBytes: &screen, bytesPerRow: bytesPerRow)
+            texture.replace(region: region, mipmapLevel: 0, withBytes: &p, bytesPerRow: bytesPerRow)
+        }
 
         return texture
     }
 
-    init(mtkView: MTKView) {
+    init(mtkView: MTKView, width: Int, height: Int) {
+        screenWidth = width
+        screenHeight = height
+        pixels = .init(repeating: .init(255, 0, 128, 255), count: Int(screenWidth) * Int(screenHeight))
         super.init()
 
         self.device = mtkView.device!
@@ -70,7 +83,8 @@ class Renderer: NSObject, MTKViewDelegate {
         /// Create the render pipeline.
 
         // Load the shaders from the default library
-        let defaultLibrary = device.makeDefaultLibrary()!
+        let bundle = Bundle(for: Screen.self)
+        let defaultLibrary = try! device.makeDefaultLibrary(bundle: bundle)
         let vertexFunction = defaultLibrary.makeFunction(name: "vertexShader")!
         let fragmentFunction = defaultLibrary.makeFunction(name: "samplingShader")!
 
@@ -138,8 +152,15 @@ class Renderer: NSObject, MTKViewDelegate {
 
 }
 
-extension Vertex {
+/// Because of this `0: error: using bridging headers with framework targets is unsupported` had to go back to mimicking
+/// C typedef layout.
+// FIXME: Find out how to do this header stuff for frameworks and remove this mimicking struct.
+struct Vertex {
+    let position: vector_float2
+    let textureCoordiante: vector_float2
+
     init(_ position: vector_float2, _ textureCoordinate: vector_float2) {
-        self.init(position: position, textureCoordinate: textureCoordinate)
+        self.position = position
+        self.textureCoordiante = textureCoordinate
     }
 }

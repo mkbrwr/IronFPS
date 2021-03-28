@@ -11,6 +11,7 @@
 using namespace metal;
 
 // Including header shared between this Metal shader code and Swift/C code executing Metal API commands
+//#include "ShaderTypes.h"
 #include "ShaderTypes.h"
 
 struct RasterizerData
