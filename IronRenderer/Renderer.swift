@@ -81,9 +81,7 @@ class Renderer: NSObject, MTKViewDelegate {
         numVertices = quadVertices.count
 
         /// Create the render pipeline.
-
-        // Load the shaders from the default library
-        let bundle = Bundle(for: Screen.self)
+        let bundle = Bundle(for: Renderer.self)
         let defaultLibrary = try! device.makeDefaultLibrary(bundle: bundle)
         let vertexFunction = defaultLibrary.makeFunction(name: "vertexShader")!
         let fragmentFunction = defaultLibrary.makeFunction(name: "samplingShader")!

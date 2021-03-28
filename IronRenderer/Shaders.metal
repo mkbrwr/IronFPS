@@ -11,7 +11,8 @@
 using namespace metal;
 
 // Including header shared between this Metal shader code and Swift/C code executing Metal API commands
-//#include "ShaderTypes.h"
+// FIXME: This types are not shared rn, because bridging headers are not supported for frameworks.
+// Need a way to get around this.
 #include "ShaderTypes.h"
 
 struct RasterizerData

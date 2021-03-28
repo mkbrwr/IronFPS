@@ -17,11 +17,11 @@ public final class Screen {
 
     let windowBackground = MTLClearColor(red: 0.6, green: 0.0, blue: 0.5, alpha: 1.0)
 
-    public init(with viewController: NSViewController) {
+    public init(with viewController: NSViewController, resolution: Resolution) {
         mtkView = MTKView(frame: viewController.view.frame)
 
-        width = 320
-        height = 288
+        width = resolution.width
+        height = resolution.height
 
         mtkView.enableSetNeedsDisplay = true
         mtkView.device = MTLCreateSystemDefaultDevice()
@@ -42,7 +42,7 @@ public final class Screen {
         renderer.pixels![position.x * width + position.y] = color
     }
 
-    public func setNeedsDisplay() {
+    public func frameReady() {
         mtkView.setNeedsDisplay(mtkView.frame)
     }
 }
@@ -56,5 +56,15 @@ public struct Position {
     public init(_ x: Int, _ y: Int) {
         self.x = x
         self.y = y
+    }
+}
+
+public struct Resolution {
+    let width: Int
+    let height: Int
+
+    public init(_ width: Int, _ height: Int) {
+        self.width = width
+        self.height = height
     }
 }

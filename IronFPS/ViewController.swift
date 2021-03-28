@@ -99,7 +99,7 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupKeypressEventMonitors()
-        ironScreen = .init(with: self)
+        ironScreen = Screen(with: self, resolution: Resolution(screenWidth, screenHeight))
 
         let prepareFrame = DispatchWorkItem { [unowned self] in runLoop() }
         worldQueue.async(execute: prepareFrame)
@@ -147,9 +147,6 @@ class ViewController: NSViewController {
     }
 
     func runLoop() {
-        DispatchQueue.main.async { [unowned self] in
-            ironScreen.setNeedsDisplay()
-        }
         updatePlayerPosition()
         for x in 0..<screenWidth {
             // For each column, calculate the projected ray angle into world space
@@ -275,12 +272,16 @@ class ViewController: NSViewController {
             }
         }
 
+        DispatchQueue.main.async { [unowned self] in
+            ironScreen.frameReady()
+        }
         let prepareFrame = DispatchWorkItem { [unowned self] in runLoop() }
         worldQueue.async(execute: prepareFrame)
     }
 
     func draw(_ x: Int, _ y: Int, color: Color) {
-//        screen[y * screenWidth + x] = color
+        // This flip in coordinates exists because coloring is top to bottom, left to right
+        // but screen is left to right, top to bottom.
         ironScreen.draw(color: color, at: Position(y, x))
     }
 }
