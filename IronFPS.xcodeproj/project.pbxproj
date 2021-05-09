@@ -19,6 +19,7 @@
 		064906D3260FA41D007C0663 /* Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064906D2260FA41D007C0663 /* Screen.swift */; };
 		064906D6260FA8D8007C0663 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634EBCB25D0BAC00066A154 /* Renderer.swift */; };
 		064906EB260FB10C007C0663 /* Shaders.metal in Resources */ = {isa = PBXBuildFile; fileRef = 0634EBCF25D1DD3D0066A154 /* Shaders.metal */; };
+		064906F12610A554007C0663 /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064906F02610A554007C0663 /* Move.swift */; };
 		06941D4025DBA4A7000B6D3A /* Brick_512.data in Resources */ = {isa = PBXBuildFile; fileRef = 06941D3F25DBA4A7000B6D3A /* Brick_512.data */; };
 		06941D5725DBDDAC000B6D3A /* Sprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06941D5625DBDDAC000B6D3A /* Sprite.swift */; };
 		06941D7D25DC386A000B6D3A /* Barrel_222x351.data in Resources */ = {isa = PBXBuildFile; fileRef = 06941D7C25DC386A000B6D3A /* Barrel_222x351.data */; };
@@ -80,6 +81,7 @@
 		064906C3260FA3EC007C0663 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		064906D2260FA41D007C0663 /* Screen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screen.swift; sourceTree = "<group>"; };
 		064906E4260FAC16007C0663 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		064906F02610A554007C0663 /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
 		06941D3F25DBA4A7000B6D3A /* Brick_512.data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Brick_512.data; sourceTree = "<group>"; };
 		06941D5625DBDDAC000B6D3A /* Sprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sprite.swift; sourceTree = "<group>"; };
 		06941D7C25DC386A000B6D3A /* Barrel_222x351.data */ = {isa = PBXFileReference; lastKnownFileType = file; path = Barrel_222x351.data; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				0634EBC025D0BA710066A154 /* Main.storyboard */,
 				0634EBC325D0BA710066A154 /* Info.plist */,
 				0634EBC425D0BA710066A154 /* IronFPS.entitlements */,
+				064906F02610A554007C0663 /* Move.swift */,
 			);
 			path = IronFPS;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				064906F12610A554007C0663 /* Move.swift in Sources */,
 				06941D5725DBDDAC000B6D3A /* Sprite.swift in Sources */,
 				0634EBBD25D0BA700066A154 /* ViewController.swift in Sources */,
 				0634EBBB25D0BA700066A154 /* AppDelegate.swift in Sources */,
