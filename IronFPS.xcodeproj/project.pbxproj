@@ -23,6 +23,8 @@
 		06941D4025DBA4A7000B6D3A /* Brick_512.data in Resources */ = {isa = PBXBuildFile; fileRef = 06941D3F25DBA4A7000B6D3A /* Brick_512.data */; };
 		06941D5725DBDDAC000B6D3A /* Sprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06941D5625DBDDAC000B6D3A /* Sprite.swift */; };
 		06941D7D25DC386A000B6D3A /* Barrel_222x351.data in Resources */ = {isa = PBXBuildFile; fileRef = 06941D7C25DC386A000B6D3A /* Barrel_222x351.data */; };
+		06B5E356261B76D400213D69 /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 06B5E355261B76D400213D69 /* teapot.obj */; };
+		06B5E35A261B776700213D69 /* ship.obj in Resources */ = {isa = PBXBuildFile; fileRef = 06B5E359261B776700213D69 /* ship.obj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +87,8 @@
 		06941D3F25DBA4A7000B6D3A /* Brick_512.data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Brick_512.data; sourceTree = "<group>"; };
 		06941D5625DBDDAC000B6D3A /* Sprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sprite.swift; sourceTree = "<group>"; };
 		06941D7C25DC386A000B6D3A /* Barrel_222x351.data */ = {isa = PBXFileReference; lastKnownFileType = file; path = Barrel_222x351.data; sourceTree = "<group>"; };
+		06B5E355261B76D400213D69 /* teapot.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
+		06B5E359261B776700213D69 /* ship.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = ship.obj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +151,8 @@
 				0634EBC325D0BA710066A154 /* Info.plist */,
 				0634EBC425D0BA710066A154 /* IronFPS.entitlements */,
 				064906F02610A554007C0663 /* Move.swift */,
+				06B5E355261B76D400213D69 /* teapot.obj */,
+				06B5E359261B776700213D69 /* ship.obj */,
 			);
 			path = IronFPS;
 			sourceTree = "<group>";
@@ -293,7 +299,9 @@
 				06941D7D25DC386A000B6D3A /* Barrel_222x351.data in Resources */,
 				06941D4025DBA4A7000B6D3A /* Brick_512.data in Resources */,
 				0634EBBF25D0BA710066A154 /* Assets.xcassets in Resources */,
+				06B5E35A261B776700213D69 /* ship.obj in Resources */,
 				0634EBC225D0BA710066A154 /* Main.storyboard in Resources */,
+				06B5E356261B76D400213D69 /* teapot.obj in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

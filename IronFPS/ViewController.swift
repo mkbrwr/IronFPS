@@ -1,308 +1,245 @@
 //
 //  ViewController.swift
-//  IronFPS
+//  Iron3D
 //
-//  Created by Mykhailo Tymchyshyn on 08.02.2021.
+//  Created by Mykhailo Tymchyshyn on 22.03.2021.
 //
 
 import Cocoa
 import IronRenderer
 
-var screenWidth = 320
-var screenHeight = 288
+let screenWidth = 720
+let screenHeight = 720
 
-var playerX = 8.0
-var playerY = 8.0
-var playerA = 0.0
+// TODO: 1. Make renderer from IronFPS into a framework and import it into this project
+// TODO: 2. Implement drawTrinagle function in rendrer
+// TODO: 3. Add elapsedTime variable on renderer to get time interval between subsequent frames.
 
-var mapHeigth = 32
-var mapWidth = 32
-
-var FOV = Double.pi / 6.0
-var depth = 16.0
-var stepSize = 0.05
-
-struct Object {
-    let x: Double
-    let y: Double
-    let sprite: Sprite
-}
-
-var objects = [Object(x:  8.5, y: 8.5, sprite: .barrel),
-               Object(x:  7.5, y: 7.5, sprite: .barrel),
-               Object(x: 10.5, y: 3.5, sprite: .barrel)]
-
-var depthBuffer = Array<Double>(repeating: 0.0, count: screenWidth)
-
-// TODO: Show a small map on the side, and also display rays that are being cast into the world.
-let map = [
-    "#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#","#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
-    "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#","#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#","#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#","#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#","#","#","#","#","#","#","#","#","#","#",".",".","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",".","#","#","#",
-    "#","#","#","#","#","#","#","#","#","#","#",".",".","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",".","#","#","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#","#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
-    "#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#","#",".",".","#","#",".",".","#","#","#","#",".",".",".",".","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#","#",".",".","#","#",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#","#",".",".",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#","#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#","#","#","#",".",".",".",".",".",".",".",".",".",".",".",".","#",
-    "#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#",
-]
-
-enum Move {
-    case foreward, backward, turnLeft, turnRight, strafeLeft, strafeRight
-
-    init?(keyCode: UInt16) {
-        switch keyCode {
-        case 13, 126: self = .foreward
-        case  1, 125: self = .backward
-        case  0, 123: self = .turnLeft
-        case  2, 124: self = .turnRight
-        case 12: self = .strafeLeft
-        case 14: self = .strafeRight
-        default: return nil
-        }
-    }
+enum Side: Int {
+    case south = 0
+    case east = 2
+    case north = 4
+    case west = 6
+    case top = 8
+    case bottom = 10
 }
 
 class ViewController: NSViewController {
+
+    let meshCube = Mesh(tris: [
+        // South
+        Triangle(p: [Vec3D(x: 0, y: 0, z: 0), Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 1, y: 1, z: 0)]),
+        Triangle(p: [Vec3D(x: 0, y: 0, z: 0), Vec3D(x: 1, y: 1, z: 0), Vec3D(x: 1, y: 0, z: 0)]),
+
+        // East
+        Triangle(p: [Vec3D(x: 1, y: 0, z: 0), Vec3D(x: 1, y: 1, z: 0), Vec3D(x: 1, y: 1, z: 1)]),
+        Triangle(p: [Vec3D(x: 1, y: 0, z: 0), Vec3D(x: 1, y: 1, z: 1), Vec3D(x: 1, y: 0, z: 1)]),
+
+        // North
+        Triangle(p: [Vec3D(x: 1, y: 0, z: 1), Vec3D(x: 1, y: 1, z: 1), Vec3D(x: 0, y: 1, z: 1)]),
+        Triangle(p: [Vec3D(x: 1, y: 0, z: 0), Vec3D(x: 0, y: 1, z: 1), Vec3D(x: 0, y: 0, z: 1)]),
+
+        // West
+        Triangle(p: [Vec3D(x: 0, y: 0, z: 1), Vec3D(x: 0, y: 1, z: 1), Vec3D(x: 0, y: 1, z: 0)]),
+        Triangle(p: [Vec3D(x: 0, y: 0, z: 1), Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 0, y: 0, z: 0)]),
+
+        // Top
+        Triangle(p: [Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 0, y: 1, z: 1), Vec3D(x: 1, y: 1, z: 1)]),
+        Triangle(p: [Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 1, y: 1, z: 1), Vec3D(x: 1, y: 1, z: 0)]),
+
+        // Bottom
+        Triangle(p: [Vec3D(x: 1, y: 0, z: 1), Vec3D(x: 0, y: 0, z: 1), Vec3D(x: 0, y: 0, z: 0)]),
+        Triangle(p: [Vec3D(x: 1, y: 0, z: 1), Vec3D(x: 0, y: 0, z: 0), Vec3D(x: 1, y: 0, z: 0)])
+    ])
+
+    // Projection matrix
+    let near = 0.1
+    let far = 1000.0
+    let fov = 90.0
+    var aspectRatio: Double!
+    var fovRad: Double!
+
+    var matProj: Mat4x4!
+
     var ironScreen: Screen!
 
     var moveCommands = Set<Move>()
     var keyDown: Any?
     var keyUp: Any?
 
-    let worldQueue = DispatchQueue(label: "IronFPS_Word_Queue",
-                                   qos: .userInteractive)
+    var vCameraX = 0.0
+    var vCameraY = 0.0
+    var vCameraZ = 0.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupKeypressEventMonitors()
+        aspectRatio = Double(screenWidth) / Double(screenHeight)
+        fovRad = 1.0 / Double(tanf(90.0 * 0.5 / 180.0 * .pi))
         ironScreen = Screen(with: self, resolution: Resolution(screenWidth, screenHeight))
 
-        let prepareFrame = DispatchWorkItem { [unowned self] in runLoop() }
-        worldQueue.async(execute: prepareFrame)
+        let renderNextFrame = DispatchWorkItem { self.renderFrame() }
+        DispatchQueue.main.async(execute: renderNextFrame)
+        setupKeypressEventMonitors()
+//        tris = ArraySlice(meshCube.tris)
+        let objFile = Bundle.main.url(forResource: "ship", withExtension: "obj")!
+        let mesh = Mesh(fileURL: objFile)
+//        debugPrint(mesh)
+        tris = ArraySlice<Triangle>(mesh.tris)
     }
 
     func setupKeypressEventMonitors() {
-        keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { event in
+        keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { [unowned self] event in
             if let move = Move(keyCode: event.keyCode) {
-                self.moveCommands.insert(move)
+                moveCommands.insert(move)
+                if moveCommands.contains(.foreward) {
+//                    print("was showing", side)
+                    side = (side + 2) % 12
+                    let debugInfo = "now shows :" + String(describing: Side(rawValue: side))
+                    print(debugInfo)
+                    tris = meshCube.tris[side...side + 1]
+                    moveCommands.removeAll()
+                }
             }
             return nil
         })
 
-        keyUp = NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: { event in
-            if let move = Move(keyCode: event.keyCode) {
-                self.moveCommands.remove(move)
-            }
-            return nil
-        })
+//        keyUp = NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: { event in
+//            if let move = Move(keyCode: event.keyCode) {
+//                self.moveCommands.remove(move)
+//            }
+//            return nil
+//        })
     }
 
-    func updatePlayerPosition() {
-        moveCommands.forEach { move in
-            switch move {
-            case .turnLeft:
-                playerA -= 0.1
-            case .turnRight:
-                playerA += 0.1
-            case .foreward:
-                playerX += sin(playerA) * 0.5
-                playerY += cos(playerA) * 0.5
-            case .backward:
-                playerX -= sin(playerA) * 0.5
-                playerY -= cos(playerA) * 0.5
-            // FIXME: Strafing does not work for all playerA
-            // case .strafeLeft:
-            //     playerX += sin(playerA) * 0.5
-            //     playerY -= cos(playerA) * 0.5
-            // case .strafeRight:
-            //     playerX -= sin(playerA) * 0.5
-            //     playerY += cos(playerA) * 0.5
-            default: break
-            }
+    var lastFrameTime = DispatchTime.now().uptimeNanoseconds
+
+    var theta = 0.0
+
+    var side = 0
+    var tris: ArraySlice<Triangle>! {
+        didSet {
+            debugPrint("Triangles to render :", tris)
         }
     }
 
-    func runLoop() {
-        updatePlayerPosition()
-        for x in 0..<screenWidth {
-            // For each column, calculate the projected ray angle into world space
-            let rayAngle = (playerA - FOV / 2.0) + (Double(x) / Double(screenWidth)) * FOV;
+    func renderFrame() {
+        ironScreen.clearScreen()
+        matProj = Mat4x4(m: [[aspectRatio * fovRad,       0, 0, 0],
+                             [0,                     fovRad, 0, 0],
+                             [0, 0,         far / (far - near), 1],
+                             [0, 0, (-far * near)/(far - near), 0]])
 
-            var distanceToWall = 0.0
-            var hitWall = false
+        var matRotZ, matRotX: Mat4x4!
 
-            let eyeX = sin(rayAngle) // Unit vector for ray in player space
-            let eyeY = cos(rayAngle)
+        // Rotation Z
+        matRotZ = Mat4x4(m: [[ cos(theta), sin(theta), 0, 0],
+                             [-sin(theta), cos(theta), 0, 0],
+                             [0, 0, 1, 0],
+                             [0, 0, 0, 1]])
 
-            var sampleX = 0.0 // How far across the texture the point should be sampled.
+        // Rotation X
+        matRotX = Mat4x4(m: [[1, 0, 0, 0],
+                             [0,  cos(theta * 0.5), sin(theta * 0.5), 0],
+                             [0, -sin(theta * 0.5), cos(theta * 0.5), 0],
+                             [0, 0, 0, 1]])
 
-            while !hitWall && distanceToWall < depth {
-                distanceToWall += stepSize
 
-                let testX = Int(playerX + eyeX * distanceToWall)
-                let testY = Int(playerY + eyeY * distanceToWall)
+//        debugPrint(theta, cos(theta * 0.5), sin(theta * 0.5))
 
-                // Test if ray is out of bounds
-                if (testX < 0 || testX >= mapWidth || testY < 0 || testY >= mapHeigth) {
-                    hitWall = true
-                    distanceToWall = depth
-                } else {
-                    // Ray is inbounds so test to see if the ray cell is a wall block
-                    if map[testY * mapWidth + testX] == "#" {
-                        hitWall = true
+        for (n, tri) in tris.enumerated() {
+            let v1rOx = multiplyMatrixVector(in: tri.p[0], m: matRotX)
+            let v2rOx = multiplyMatrixVector(in: tri.p[1], m: matRotX)
+            let v3rOx = multiplyMatrixVector(in: tri.p[2], m: matRotX)
 
-                        // Determine where ray has hit wall. Break Block boundary
-                        // int 4 line segmants
-                        let blockMidX = Double(testX) + 0.5
-                        let blockMidY = Double(testY) + 0.5
+            let v1rOxz = multiplyMatrixVector(in: v1rOx, m: matRotZ)
+            let v2rOxz = multiplyMatrixVector(in: v2rOx, m: matRotZ)
+            let v3rOxz = multiplyMatrixVector(in: v3rOx, m: matRotZ)
 
-                        // Point where ray collided with wall
-                        let testPointX = playerX + eyeX * distanceToWall
-                        let testPointY = playerY + eyeY * distanceToWall
+            var triTranslated = Triangle(p: [v1rOxz, v2rOxz, v3rOxz])
+            triTranslated.p[0].z = v1rOxz.z + 9.0
+            triTranslated.p[1].z = v2rOxz.z + 9.0
+            triTranslated.p[2].z = v3rOxz.z + 9.0
 
-                        let testAngle = atan2(testPointY - blockMidY, testPointX - blockMidX)
+            // Calculate triangle normal for clocwise winding using vector cross product
+            let line1x = triTranslated.p[1].x - triTranslated.p[0].x
+            let line1y = triTranslated.p[1].y - triTranslated.p[0].y
+            let line1z = triTranslated.p[1].z - triTranslated.p[0].z
 
-                        if testAngle >= .pi * 0.25 && testAngle < .pi * 0.25 {
-                            sampleX = testPointY - Double(testY)
-                        }
-                        if testAngle >= .pi * 0.25 && testAngle < .pi * 0.75 {
-                            sampleX = testPointY - Double(testY)
-                        }
-                        if testAngle < -.pi * 0.25 && testAngle >= -.pi * 0.75 {
-                            sampleX = testPointY - Double(testY)
-                        }
-                        if testAngle >= .pi * 0.75 || testAngle < -.pi * 0.75 {
-                            sampleX = testPointY - Double(testY)
-                        }
-                    }
-                }
-            }
-            // Calculate distance to ceiling and floor
-            let ceiling = Int(Double(screenHeight) / 2.0 - Double(screenHeight) / Double(distanceToWall))
-            let floor = screenHeight - ceiling
+            let line2x = triTranslated.p[2].x - triTranslated.p[0].x
+            let line2y = triTranslated.p[2].y - triTranslated.p[0].y
+            let line2z = triTranslated.p[2].z - triTranslated.p[0].z
 
-            // Update Depth Buffer
-            depthBuffer[x] = distanceToWall
+            var normalx = line1y * line2z - line1z * line2y
+            var normaly = line1z * line2x - line1x * line2z
+            var normalz = line1x * line2y - line1y * line2x
 
-            let shade = Float32( depth / distanceToWall - 1 )
-            for y in 0..<screenHeight {
-                if y <= ceiling { // Sky
-                    draw(x, y, color: .sky)
-                } else if y > ceiling && y <= floor { // Wall
-                    let sampleY = Double((Float32(y) - Float32(ceiling)) / (Float32(floor) - Float32(ceiling)))
-                    let color = Sprite.wall.sampleAt(x: sampleX, y: sampleY).shaded(shade)
-                    draw(x, y, color: color)
-                } else { // Floor
-                    let b = (Float32(y) - Float32(screenHeight) / 2.0) / ( Float32(screenHeight) / 2.0 )
-                    draw(x, y, color: .darkGreen(shade: b ))
-                }
-            }
-        }
+            let normalLength = sqrt(normalx * normalx + normaly * normaly + normalz * normalz)
 
-        // Update and Draw Objects
-        for object in objects {
-            // Can the object be seen by the player ?
-            let vecX = object.x - playerX
-            let vecY = object.y - playerY
-            let distanceFromPlayer = sqrt(vecX * vecX + vecY * vecY)
+            normalx /= normalLength
+            normaly /= normalLength
+            normalz /= normalLength
 
-            // Calculate angle between lamp and players feet, and players looking direction
-            // to determine if the object is in the players field of view
-            let eyeX = sin(playerA)
-            let eyeY = cos(playerA)
-            var objectAngle = atan2(eyeY, eyeX) - atan2(vecY, vecX)
+//          if normalz < 0 {
+            if (normalx * (triTranslated.p[0].x - vCameraX) +
+                normaly * (triTranslated.p[0].y - vCameraY) +
+                normalz * (triTranslated.p[0].z - vCameraZ) < 0.0) {
 
-            if objectAngle < -.pi {
-                objectAngle += 2.0 * .pi
-            }
-            if objectAngle > .pi {
-                objectAngle -= 2.0 * .pi
-            }
+                // Illumination
+                var lightDirection = Vec3D(x: 0.0, y: 0.0, z: -1.0)
+                let l = sqrt(lightDirection.x * lightDirection.x +
+                             lightDirection.y * lightDirection.y +
+                             lightDirection.z * lightDirection.z)
+                lightDirection.x /= l
+                lightDirection.y /= l
+                lightDirection.z /= l
 
-            let inPlayerFOV = abs(objectAngle) < FOV / 2.0
+                // TODO: fix luminance calculation for mesh loaded from obj file
+//                let dp = normalx * lightDirection.x + normaly * lightDirection.y + normalz * lightDirection.z
 
-            if inPlayerFOV && distanceFromPlayer >= 2 && distanceFromPlayer < depth {
-                let objectCeiling = Double(screenHeight) / 2.0 - Double(screenHeight) / distanceFromPlayer
-                let objectFloor = Double(screenHeight) - objectCeiling
-                let objectHeight = (objectFloor - objectCeiling)
-                let objectAspectRatio = 351.0/222.0
-                let objectWidth = objectHeight / objectAspectRatio
+                // Project triangles from 3D --> 2D
+                let v1 = multiplyMatrixVector(in: triTranslated.p[0], m: matProj)
+                let v2 = multiplyMatrixVector(in: triTranslated.p[1], m: matProj)
+                let v3 = multiplyMatrixVector(in: triTranslated.p[2], m: matProj)
 
-                let middleOfObject = (0.5 * (objectAngle / (FOV / 2.0)) + 0.5) * Double(screenWidth)
+                var triProjected = Triangle(p: [v1, v2, v3])
 
-                for lx in stride(from: 0.0, to: objectWidth, by: 1.0) {
-                    for ly in stride(from: 0.0, to: objectHeight, by: 1.0) {
-                        let sampleX = lx / objectWidth
-                        let sampleY = ly / objectHeight
+                // Scale into view
+                //            triProjected.p[0].x += 1.0; triProjected.p[0].y += 1.0
+                //            triProjected.p[1].x += 1.0; triProjected.p[1].y += 1.0
+                //            triProjected.p[2].x += 1.0; triProjected.p[2].y += 1.0
 
-                        let color = Sprite.barrel.sampleAt(x: sampleX, y: sampleY)
-                        let objectColumn = middleOfObject + lx - (objectWidth / 2.0)
-                        if objectColumn >= 0 && objectColumn < Double(screenWidth) {
-                            if depthBuffer[Int(objectColumn)] >= distanceFromPlayer && color.w != 0 {
-                                draw(Int(objectColumn), Int(objectCeiling + ly), color: color)
-                                depthBuffer[Int(objectColumn)] = distanceFromPlayer
-                            }
-                        }
-                    }
-                }
+                triProjected.p[0].x *= 300.0 // 0.5 * Double(screenWidth)
+                triProjected.p[0].y *= 300.0 // 0.5 * Double(screenHeight)
+                triProjected.p[1].x *= 300.0 // 0.5 * Double(screenWidth)
+                triProjected.p[1].y *= 300.0 // 0.5 * Double(screenHeight)
+                triProjected.p[2].x *= 300.0 // 0.5 * Double(screenWidth)
+                triProjected.p[2].y *= 300.0 // 0.5 * Double(screenHeight)
+
+                ironScreen.draw(triangle: triProjected, color: Color(UInt8(255),
+                                                                     UInt8(255),
+                                                                     UInt8(255),
+                                                                     255))
             }
         }
-
-        DispatchQueue.main.async { [unowned self] in
-            ironScreen.frameReady()
-        }
-        let prepareFrame = DispatchWorkItem { [unowned self] in runLoop() }
-        worldQueue.async(execute: prepareFrame)
-    }
-
-    func draw(_ x: Int, _ y: Int, color: Color) {
-        // This flip in coordinates exists because coloring is top to bottom, left to right
-        // but screen is left to right, top to bottom.
-        ironScreen.draw(color: color, at: Position(y, x))
+        ironScreen.frameReady()
+//        let timeNow = DispatchTime.now().uptimeNanoseconds
+//        debugPrint("Frame prepared in ", Double(timeNow - lastFrameTime), "ns")
+//        lastFrameTime = timeNow
+        theta += 0.01
+        let renderNextFrame = DispatchWorkItem { self.renderFrame() }
+        DispatchQueue.main.async(execute: renderNextFrame)
     }
 }
 
-extension Color {
-    static let sky = Color(25, 0, 128, 255).brga()
-    static let lightGray = Color(128, 128, 128, 250).brga()
-    static let gray = Color(128, 128, 128, 255).brga()
-    static let darkGray = Color(52, 52, 52, 255).brga()
-    static let darkGreen = Color(0, 52, 255, 255).brga()
-    static let black =  Color(0, 0, 0, 255).brga()
-    static let white = Color(255, 255, 255, 255).brga()
-    static func white(shade: Float32) -> Color { white.shaded(shade) }
-    static func darkGreen(shade: Float32) -> Color { Color(0, UInt8(52 * shade), 0, 255) }
+func multiplyMatrixVector(in i: Vec3D, m: Mat4x4) -> Vec3D {
+    let outX = i.x * m.m[0][0] + i.y * m.m[1][0] + i.z * m.m[2][0] + m.m[3][0]
+    let outY = i.x * m.m[0][1] + i.y * m.m[1][1] + i.z * m.m[2][1] + m.m[3][1]
+    let outZ = i.x * m.m[0][2] + i.y * m.m[1][2] + i.z * m.m[2][2] + m.m[3][2]
+    let    w = i.x * m.m[0][3] + i.y * m.m[1][3] + i.z * m.m[2][3] + m.m[3][3]
 
-    func shaded(_ shade: Float32) -> Color {
-        let shade = Swift.min(shade, 1)
-        return Color(UInt8(Float(x) * shade), UInt8(Float(y) * shade), UInt8(Float(z) * shade), w)
-    }
-
-    func brga() -> SIMD4<UInt8> {
-        return SIMD4<UInt8>(z, y, x, w)
+    if w != 0.0 {
+        return Vec3D(x: outX / w, y: outY / w, z: outZ / w)
+    } else {
+        return Vec3D(x: outX, y: outY, z: outZ)
     }
 }

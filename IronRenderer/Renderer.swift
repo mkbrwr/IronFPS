@@ -55,6 +55,8 @@ class Renderer: NSObject, MTKViewDelegate {
         return texture
     }
 
+    var quadVertices: [Vertex] = []
+
     init(mtkView: MTKView, width: Int, height: Int) {
         screenWidth = width
         screenHeight = height
@@ -63,22 +65,17 @@ class Renderer: NSObject, MTKViewDelegate {
 
         self.device = mtkView.device!
 
-        // Set up a simple MTLBuffer with vertices which include texture coordinates
-        var quadVertices: [Vertex] = [
-            Vertex(vector_float2( 250, -250), vector_float2(1.0, 1.0)),
-            Vertex(vector_float2(-250, -250), vector_float2(0.0, 1.0)),
-            Vertex(vector_float2(-250,  250), vector_float2(0.0, 0.0)),
+        quadVertices.append(contentsOf:
+        [     // Size two square around the (0,0) point
+            Vertex(SIMD2<Float>( 1, -1), SIMD4<Float>(1.0, 1.0, 1.0, 1.0)),
+            Vertex(SIMD2<Float>(-1, -1), SIMD4<Float>(1.0, 1.0, 1.0, 1.0)),
+            Vertex(SIMD2<Float>(-1,  1), SIMD4<Float>(1.0, 1.0, 1.0, 1.0)),
+            Vertex(SIMD2<Float>( 1, -1), SIMD4<Float>(1.0, 1.0, 1.0, 1.0)),
+            Vertex(SIMD2<Float>(-1,  1), SIMD4<Float>(1.0, 1.0, 1.0, 1.0)),
+            Vertex(SIMD2<Float>( 1,  1), SIMD4<Float>(1.0, 1.0, 1.0, 1.0))
+        ])
 
-            Vertex(vector_float2( 250, -250), vector_float2(1.0, 1.0)),
-            Vertex(vector_float2(-250,  250), vector_float2(0.0, 0.0)),
-            Vertex(vector_float2( 250,  250), vector_float2(1.0, 0.0))
-        ]
 
-        // Create a vertex buffer, and initialize it with the quadVertices array
-        vertices = device.makeBuffer(bytes: &quadVertices,
-                                     length: MemoryLayout<Vertex>.stride * quadVertices.count,
-                                     options: .storageModeShared)!
-        numVertices = quadVertices.count
 
         /// Create the render pipeline.
         let bundle = Bundle(for: Renderer.self)
@@ -99,7 +96,13 @@ class Renderer: NSObject, MTKViewDelegate {
 
     /// Called whenever the view needs to render a frame.
     func draw(in view: MTKView) {
-        texture = makeTextureFromScreenBytes()
+        if quadVertices.isEmpty { return }
+        // Create a vertex buffer, and initialize it with the quadVertices array
+        vertices = device.makeBuffer(bytes: &quadVertices,
+                                     length: MemoryLayout<Vertex>.stride * quadVertices.count,
+                                     options: .storageModeShared)!
+        numVertices = quadVertices.count
+//        texture = makeTextureFromScreenBytes()
         // Create a new command buffer for each render pass to the current drawable
         let commandBuffer = commandQueue.makeCommandBuffer()!
         commandBuffer.label = "MyCommand"
@@ -125,8 +128,8 @@ class Renderer: NSObject, MTKViewDelegate {
                                      length: MemoryLayout<vector_uint2>.stride,
                                      index: 1)
 
-        renderEncoder.setFragmentTexture(texture,
-                                         index: 0)
+//        renderEncoder.setFragmentTexture(texture,
+//                                         index: 0)
 
         // Draw the triangles.
         renderEncoder.drawPrimitives(type: .triangle,
@@ -155,10 +158,10 @@ class Renderer: NSObject, MTKViewDelegate {
 // FIXME: Find out how to do this header stuff for frameworks and remove this mimicking struct.
 struct Vertex {
     let position: vector_float2
-    let textureCoordiante: vector_float2
+    let color: vector_float4
 
-    init(_ position: vector_float2, _ textureCoordinate: vector_float2) {
+    init(_ position: vector_float2, _ color: vector_float4) {
         self.position = position
-        self.textureCoordiante = textureCoordinate
+        self.color = color
     }
 }
