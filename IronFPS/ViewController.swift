@@ -81,9 +81,10 @@ class ViewController: NSViewController {
         DispatchQueue.main.async(execute: renderNextFrame)
         setupKeypressEventMonitors()
 //        tris = ArraySlice(meshCube.tris)
-        let objFile = Bundle.main.url(forResource: "ship", withExtension: "obj")!
+        let objFile = Bundle.main.url(forResource: "teapot", withExtension: "obj")!
         let mesh = Mesh(fileURL: objFile)
 //        debugPrint(mesh)
+//        tris = ArraySlice<Triangle>(meshCube.tris)
         tris = ArraySlice<Triangle>(mesh.tris)
     }
 
@@ -91,14 +92,6 @@ class ViewController: NSViewController {
         keyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { [unowned self] event in
             if let move = Move(keyCode: event.keyCode) {
                 moveCommands.insert(move)
-                if moveCommands.contains(.foreward) {
-//                    print("was showing", side)
-                    side = (side + 2) % 12
-                    let debugInfo = "now shows :" + String(describing: Side(rawValue: side))
-                    print(debugInfo)
-                    tris = meshCube.tris[side...side + 1]
-                    moveCommands.removeAll()
-                }
             }
             return nil
         })
@@ -118,7 +111,7 @@ class ViewController: NSViewController {
     var side = 0
     var tris: ArraySlice<Triangle>! {
         didSet {
-            debugPrint("Triangles to render :", tris)
+            debugPrint("Triangles to render :", String(describing: tris))
         }
     }
 
@@ -129,6 +122,7 @@ class ViewController: NSViewController {
                              [0, 0,         far / (far - near), 1],
                              [0, 0, (-far * near)/(far - near), 0]])
 
+        /// Matrices describing rotation along Z and X axes.
         var matRotZ, matRotX: Mat4x4!
 
         // Rotation Z
@@ -142,9 +136,6 @@ class ViewController: NSViewController {
                              [0,  cos(theta * 0.5), sin(theta * 0.5), 0],
                              [0, -sin(theta * 0.5), cos(theta * 0.5), 0],
                              [0, 0, 0, 1]])
-
-
-//        debugPrint(theta, cos(theta * 0.5), sin(theta * 0.5))
 
         for (n, tri) in tris.enumerated() {
             let v1rOx = multiplyMatrixVector(in: tri.p[0], m: matRotX)
@@ -160,26 +151,29 @@ class ViewController: NSViewController {
             triTranslated.p[1].z = v2rOxz.z + 9.0
             triTranslated.p[2].z = v3rOxz.z + 9.0
 
-            // Calculate triangle normal for clocwise winding using vector cross product
+            // - Calculate triangle normal for clocwise winding using vector cross product.
+            // Triangle vector A.
             let line1x = triTranslated.p[1].x - triTranslated.p[0].x
             let line1y = triTranslated.p[1].y - triTranslated.p[0].y
             let line1z = triTranslated.p[1].z - triTranslated.p[0].z
 
+            // Triangle vector B.
             let line2x = triTranslated.p[2].x - triTranslated.p[0].x
             let line2y = triTranslated.p[2].y - triTranslated.p[0].y
             let line2z = triTranslated.p[2].z - triTranslated.p[0].z
 
+            // Calculate normal for xyz using cross product of A and B.
             var normalx = line1y * line2z - line1z * line2y
             var normaly = line1z * line2x - line1x * line2z
             var normalz = line1x * line2y - line1y * line2x
 
+            // Normalize normal vector.
             let normalLength = sqrt(normalx * normalx + normaly * normaly + normalz * normalz)
-
             normalx /= normalLength
             normaly /= normalLength
             normalz /= normalLength
 
-//          if normalz < 0 {
+          if normalz < 0 {
             if (normalx * (triTranslated.p[0].x - vCameraX) +
                 normaly * (triTranslated.p[0].y - vCameraY) +
                 normalz * (triTranslated.p[0].z - vCameraZ) < 0.0) {
@@ -193,8 +187,9 @@ class ViewController: NSViewController {
                 lightDirection.y /= l
                 lightDirection.z /= l
 
-                // TODO: fix luminance calculation for mesh loaded from obj file
-//                let dp = normalx * lightDirection.x + normaly * lightDirection.y + normalz * lightDirection.z
+                // Normal is an imaginary vector that is perpendicular to plane defined by the triangle.
+                // TODO: fix luminance calculation for mesh loaded from file
+                let dotProduct = normalx * lightDirection.x + normaly * lightDirection.y + normalz * lightDirection.z
 
                 // Project triangles from 3D --> 2D
                 let v1 = multiplyMatrixVector(in: triTranslated.p[0], m: matProj)
@@ -215,11 +210,12 @@ class ViewController: NSViewController {
                 triProjected.p[2].x *= 300.0 // 0.5 * Double(screenWidth)
                 triProjected.p[2].y *= 300.0 // 0.5 * Double(screenHeight)
 
-                ironScreen.draw(triangle: triProjected, color: Color(UInt8(255),
-                                                                     UInt8(255),
-                                                                     UInt8(255),
-                                                                     255))
+                ironScreen.draw(triangle: triProjected, color: Color(UInt8(255 * dotProduct),
+                                                                     UInt8(255 * dotProduct),
+                                                                     UInt8(255 * dotProduct),
+                                                                     UInt8(255)))
             }
+          }
         }
         ironScreen.frameReady()
 //        let timeNow = DispatchTime.now().uptimeNanoseconds
