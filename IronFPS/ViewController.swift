@@ -11,10 +11,6 @@ import IronRenderer
 let screenWidth = 720
 let screenHeight = 720
 
-// TODO: 1. Make renderer from IronFPS into a framework and import it into this project
-// TODO: 2. Implement drawTrinagle function in rendrer
-// TODO: 3. Add elapsedTime variable on renderer to get time interval between subsequent frames.
-
 enum Side: Int {
     case south = 0
     case east = 2
@@ -81,7 +77,7 @@ class ViewController: NSViewController {
         DispatchQueue.main.async(execute: renderNextFrame)
         setupKeypressEventMonitors()
 //        tris = ArraySlice(meshCube.tris)
-        let objFile = Bundle.main.url(forResource: "teapot", withExtension: "obj")!
+        let objFile = Bundle.main.url(forResource: "ship", withExtension: "obj")!
         let mesh = Mesh(fileURL: objFile)
 //        debugPrint(mesh)
 //        tris = ArraySlice<Triangle>(meshCube.tris)
@@ -136,6 +132,10 @@ class ViewController: NSViewController {
                              [0,  cos(theta * 0.5), sin(theta * 0.5), 0],
                              [0, -sin(theta * 0.5), cos(theta * 0.5), 0],
                              [0, 0, 0, 1]])
+
+
+        var triangles: [(Triangle, Double)] = []
+
 
         for (n, tri) in tris.enumerated() {
             let v1rOx = multiplyMatrixVector(in: tri.p[0], m: matRotX)
@@ -210,13 +210,24 @@ class ViewController: NSViewController {
                 triProjected.p[2].x *= 300.0 // 0.5 * Double(screenWidth)
                 triProjected.p[2].y *= 300.0 // 0.5 * Double(screenHeight)
 
-                ironScreen.draw(triangle: triProjected, color: Color(UInt8(255 * dotProduct),
-                                                                     UInt8(255 * dotProduct),
-                                                                     UInt8(255 * dotProduct),
-                                                                     UInt8(255)))
+                triangles.append((triProjected, dotProduct))
             }
           }
         }
+
+        triangles.sort { (arg0, arg1) -> Bool in
+            let (triA, _) = arg0
+            let (triB, _) = arg1
+            return triA.p[2].z > triB.p[2].z
+        }
+
+        for (triProjected, dotProduct) in triangles {
+        ironScreen.draw(triangle: triProjected, color: Color(UInt8(255 * dotProduct),
+                                                             UInt8(255 * dotProduct),
+                                                             UInt8(255 * dotProduct),
+                                                             UInt8(255)))
+        }
+        // TODO: Implement depth buffer and fix issue when trialgles overlap when rendered on screen.
         ironScreen.frameReady()
 //        let timeNow = DispatchTime.now().uptimeNanoseconds
 //        debugPrint("Frame prepared in ", Double(timeNow - lastFrameTime), "ns")
