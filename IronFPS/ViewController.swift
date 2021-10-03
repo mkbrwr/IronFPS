@@ -7,6 +7,7 @@
 
 import Cocoa
 import IronRenderer
+import simd
 
 let screenWidth = 720
 let screenHeight = 720
@@ -55,7 +56,7 @@ class ViewController: NSViewController {
     var aspectRatio: Double!
     var fovRad: Double!
 
-    var matProj: Mat4x4!
+    var matProjMat4x4: Mat4x4!
 
     var ironScreen: Screen!
 
@@ -76,10 +77,8 @@ class ViewController: NSViewController {
         let renderNextFrame = DispatchWorkItem { self.renderFrame() }
         DispatchQueue.main.async(execute: renderNextFrame)
         setupKeypressEventMonitors()
-//        tris = ArraySlice(meshCube.tris)
         let objFile = Bundle.main.url(forResource: "ship", withExtension: "obj")!
         let mesh = Mesh(fileURL: objFile)
-//        debugPrint(mesh)
 //        tris = ArraySlice<Triangle>(meshCube.tris)
         tris = ArraySlice<Triangle>(mesh.tris)
     }
@@ -113,38 +112,52 @@ class ViewController: NSViewController {
 
     func renderFrame() {
         ironScreen.clearScreen()
-        matProj = Mat4x4(m: [[aspectRatio * fovRad,       0, 0, 0],
+        matProjMat4x4 = Mat4x4(m: [[aspectRatio * fovRad,       0, 0, 0],
                              [0,                     fovRad, 0, 0],
                              [0, 0,         far / (far - near), 1],
                              [0, 0, (-far * near)/(far - near), 0]])
 
-        /// Matrices describing rotation along Z and X axes.
-        var matRotZ, matRotX: Mat4x4!
+        let projectionRow0 = simd_float4(Float(aspectRatio * fovRad), 0, 0, 0)
+        let projectionRow1 = simd_float4(0, Float(fovRad), 0, 0)
+        let projectionRow2 = simd_float4(0, 0,  Float(far / (far - near)), 1)
+        let projectionRow3 = simd_float4(0, 0, Float((-far * near) / (far - near)), 0)
 
+        let projection = simd_float4x4(rows: [projectionRow0,
+                                              projectionRow1,
+                                              projectionRow2,
+                                              projectionRow3])
+
+        /// Matrices describing rotation along Z and X axes.
+        var matRotZMat4x4, matRotXMat4x4: Mat4x4!
+
+        // TODO: Do rotation matrices usign following functions from simd:
+        //       simd_quatf(angle: <#T##Float#>, axis: <#T##SIMD3<Float>#>)
+        //       simd_act(<#T##q: simd_quatf##simd_quatf#>, <#T##v: simd_float3##simd_float3#>)
+        
         // Rotation Z
-        matRotZ = Mat4x4(m: [[ cos(theta), sin(theta), 0, 0],
+        matRotZMat4x4 = Mat4x4(m: [[ cos(theta), sin(theta), 0, 0],
                              [-sin(theta), cos(theta), 0, 0],
                              [0, 0, 1, 0],
                              [0, 0, 0, 1]])
 
         // Rotation X
-        matRotX = Mat4x4(m: [[1, 0, 0, 0],
+        matRotXMat4x4 = Mat4x4(m: [[1, 0, 0, 0],
                              [0,  cos(theta * 0.5), sin(theta * 0.5), 0],
                              [0, -sin(theta * 0.5), cos(theta * 0.5), 0],
                              [0, 0, 0, 1]])
 
 
-        var triangles: [(Triangle, Double)] = []
+        var triangles: [(Triangle, Float)] = []
 
 
         for (n, tri) in tris.enumerated() {
-            let v1rOx = multiplyMatrixVector(in: tri.p[0], m: matRotX)
-            let v2rOx = multiplyMatrixVector(in: tri.p[1], m: matRotX)
-            let v3rOx = multiplyMatrixVector(in: tri.p[2], m: matRotX)
+            let v1rOx = multiplyMatrixVector(in: tri.p[0], m: matRotXMat4x4)
+            let v2rOx = multiplyMatrixVector(in: tri.p[1], m: matRotXMat4x4)
+            let v3rOx = multiplyMatrixVector(in: tri.p[2], m: matRotXMat4x4)
 
-            let v1rOxz = multiplyMatrixVector(in: v1rOx, m: matRotZ)
-            let v2rOxz = multiplyMatrixVector(in: v2rOx, m: matRotZ)
-            let v3rOxz = multiplyMatrixVector(in: v3rOx, m: matRotZ)
+            let v1rOxz = multiplyMatrixVector(in: v1rOx, m: matRotZMat4x4)
+            let v2rOxz = multiplyMatrixVector(in: v2rOx, m: matRotZMat4x4)
+            let v3rOxz = multiplyMatrixVector(in: v3rOx, m: matRotZMat4x4)
 
             var triTranslated = Triangle(p: [v1rOxz, v2rOxz, v3rOxz])
             triTranslated.p[0].z = v1rOxz.z + 9.0
@@ -178,23 +191,33 @@ class ViewController: NSViewController {
                 normaly * (triTranslated.p[0].y - vCameraY) +
                 normalz * (triTranslated.p[0].z - vCameraZ) < 0.0) {
 
-                // Illumination
-                var lightDirection = Vec3D(x: 0.0, y: 0.0, z: -1.0)
-                let l = sqrt(lightDirection.x * lightDirection.x +
-                             lightDirection.y * lightDirection.y +
-                             lightDirection.z * lightDirection.z)
-                lightDirection.x /= l
-                lightDirection.y /= l
-                lightDirection.z /= l
+                // - Illumination
+                var lightDirectionVec3D = Vec3D(x: 0.0, y: 0.0, z: -1.0)
 
-                // Normal is an imaginary vector that is perpendicular to plane defined by the triangle.
-                // TODO: fix luminance calculation for mesh loaded from file
-                let dotProduct = normalx * lightDirection.x + normaly * lightDirection.y + normalz * lightDirection.z
+                let l = sqrt(lightDirectionVec3D.x * lightDirectionVec3D.x +
+                             lightDirectionVec3D.y * lightDirectionVec3D.y +
+                             lightDirectionVec3D.z * lightDirectionVec3D.z)
+                lightDirectionVec3D.x /= l
+                lightDirectionVec3D.y /= l
+                lightDirectionVec3D.z /= l
 
+                let lightDirection = simd_float3(Float(lightDirectionVec3D.x),
+                                                 Float(lightDirectionVec3D.y),
+                                                 Float(lightDirectionVec3D.z))
+
+                let surfaceNormal = simd_float3(Float(normalx), Float(normaly), Float(normalz))
+
+                // Mesure of how much light is reflected by tirangle
+                let luminance = simd_dot(surfaceNormal, lightDirection)
+
+
+                // - Projection to the screen
                 // Project triangles from 3D --> 2D
-                let v1 = multiplyMatrixVector(in: triTranslated.p[0], m: matProj)
-                let v2 = multiplyMatrixVector(in: triTranslated.p[1], m: matProj)
-                let v3 = multiplyMatrixVector(in: triTranslated.p[2], m: matProj)
+
+                // TODO: Replace with matrix by vector multiplication operation from simd library.
+                let v1 = multiplyMatrixVector(in: triTranslated.p[0], m: matProjMat4x4)
+                let v2 = multiplyMatrixVector(in: triTranslated.p[1], m: matProjMat4x4)
+                let v3 = multiplyMatrixVector(in: triTranslated.p[2], m: matProjMat4x4)
 
                 var triProjected = Triangle(p: [v1, v2, v3])
 
@@ -210,15 +233,18 @@ class ViewController: NSViewController {
                 triProjected.p[2].x *= 300.0 // 0.5 * Double(screenWidth)
                 triProjected.p[2].y *= 300.0 // 0.5 * Double(screenHeight)
 
-                triangles.append((triProjected, dotProduct))
+                triangles.append((triProjected, luminance))
             }
           }
         }
 
+        // Sort triangles back to front based on calculated midpoint value for z.
         triangles.sort { (arg0, arg1) -> Bool in
-            let (triA, _) = arg0
-            let (triB, _) = arg1
-            return triA.p[2].z > triB.p[2].z
+            let (t1, _) = arg0
+            let (t2, _) = arg1
+            let z1 = (t1.p[0].z + t1.p[1].z + t1.p[2].z) / 3.0
+            let z2 = (t2.p[0].z + t2.p[1].z + t2.p[2].z) / 3.0
+            return z1 > z2
         }
 
         for (triProjected, dotProduct) in triangles {
@@ -227,12 +253,16 @@ class ViewController: NSViewController {
                                                              UInt8(255 * dotProduct),
                                                              UInt8(255)))
         }
-        // TODO: Implement depth buffer and fix issue when trialgles overlap when rendered on screen.
+
         ironScreen.frameReady()
 //        let timeNow = DispatchTime.now().uptimeNanoseconds
 //        debugPrint("Frame prepared in ", Double(timeNow - lastFrameTime), "ns")
 //        lastFrameTime = timeNow
-        theta += 0.01
+        if !moveCommands.isEmpty {
+            theta += 0.1
+            moveCommands.removeAll()
+        }
+
         let renderNextFrame = DispatchWorkItem { self.renderFrame() }
         DispatchQueue.main.async(execute: renderNextFrame)
     }
