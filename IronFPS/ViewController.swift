@@ -12,43 +12,7 @@ import simd
 let screenWidth = 720
 let screenHeight = 720
 
-enum Side: Int {
-    case south = 0
-    case east = 2
-    case north = 4
-    case west = 6
-    case top = 8
-    case bottom = 10
-}
-
 class ViewController: NSViewController {
-
-    let meshCube = Mesh(tris: [
-        // South
-        Triangle(p: [Vec3D(x: 0, y: 0, z: 0), Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 1, y: 1, z: 0)]),
-        Triangle(p: [Vec3D(x: 0, y: 0, z: 0), Vec3D(x: 1, y: 1, z: 0), Vec3D(x: 1, y: 0, z: 0)]),
-
-        // East
-        Triangle(p: [Vec3D(x: 1, y: 0, z: 0), Vec3D(x: 1, y: 1, z: 0), Vec3D(x: 1, y: 1, z: 1)]),
-        Triangle(p: [Vec3D(x: 1, y: 0, z: 0), Vec3D(x: 1, y: 1, z: 1), Vec3D(x: 1, y: 0, z: 1)]),
-
-        // North
-        Triangle(p: [Vec3D(x: 1, y: 0, z: 1), Vec3D(x: 1, y: 1, z: 1), Vec3D(x: 0, y: 1, z: 1)]),
-        Triangle(p: [Vec3D(x: 1, y: 0, z: 0), Vec3D(x: 0, y: 1, z: 1), Vec3D(x: 0, y: 0, z: 1)]),
-
-        // West
-        Triangle(p: [Vec3D(x: 0, y: 0, z: 1), Vec3D(x: 0, y: 1, z: 1), Vec3D(x: 0, y: 1, z: 0)]),
-        Triangle(p: [Vec3D(x: 0, y: 0, z: 1), Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 0, y: 0, z: 0)]),
-
-        // Top
-        Triangle(p: [Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 0, y: 1, z: 1), Vec3D(x: 1, y: 1, z: 1)]),
-        Triangle(p: [Vec3D(x: 0, y: 1, z: 0), Vec3D(x: 1, y: 1, z: 1), Vec3D(x: 1, y: 1, z: 0)]),
-
-        // Bottom
-        Triangle(p: [Vec3D(x: 1, y: 0, z: 1), Vec3D(x: 0, y: 0, z: 1), Vec3D(x: 0, y: 0, z: 0)]),
-        Triangle(p: [Vec3D(x: 1, y: 0, z: 1), Vec3D(x: 0, y: 0, z: 0), Vec3D(x: 1, y: 0, z: 0)])
-    ])
-
     // Projection matrix
     let near = 0.1
     let far = 1000.0
@@ -56,7 +20,10 @@ class ViewController: NSViewController {
     var aspectRatio: Double!
     var fovRad: Double!
 
-    var matProjMat4x4: Mat4x4!
+    lazy var matProjMat4x4 = Mat4x4(m: [[aspectRatio * fovRad,       0, 0, 0],
+                                              [0,                     fovRad, 0, 0],
+                                              [0, 0,         far / (far - near), 1],
+                                              [0, 0, (-far * near)/(far - near), 0]])
 
     var ironScreen: Screen!
 
@@ -74,13 +41,13 @@ class ViewController: NSViewController {
         fovRad = 1.0 / Double(tanf(90.0 * 0.5 / 180.0 * .pi))
         ironScreen = Screen(with: self, resolution: Resolution(screenWidth, screenHeight))
 
+        setupKeypressEventMonitors()
+        let objFile = Bundle.main.url(forResource: "teapot", withExtension: "obj")!
+        let mesh = Mesh(fileURL: objFile)
+        tris = ArraySlice<Triangle>(mesh.tris)
+
         let renderNextFrame = DispatchWorkItem { self.renderFrame() }
         DispatchQueue.main.async(execute: renderNextFrame)
-        setupKeypressEventMonitors()
-        let objFile = Bundle.main.url(forResource: "ship", withExtension: "obj")!
-        let mesh = Mesh(fileURL: objFile)
-//        tris = ArraySlice<Triangle>(meshCube.tris)
-        tris = ArraySlice<Triangle>(mesh.tris)
     }
 
     func setupKeypressEventMonitors() {
@@ -103,7 +70,6 @@ class ViewController: NSViewController {
 
     var theta = 0.0
 
-    var side = 0
     var tris: ArraySlice<Triangle>! {
         didSet {
             debugPrint("Triangles to render :", String(describing: tris))
@@ -112,11 +78,6 @@ class ViewController: NSViewController {
 
     func renderFrame() {
         ironScreen.clearScreen()
-        matProjMat4x4 = Mat4x4(m: [[aspectRatio * fovRad,       0, 0, 0],
-                             [0,                     fovRad, 0, 0],
-                             [0, 0,         far / (far - near), 1],
-                             [0, 0, (-far * near)/(far - near), 0]])
-
         let projectionRow0 = simd_float4(Float(aspectRatio * fovRad), 0, 0, 0)
         let projectionRow1 = simd_float4(0, Float(fovRad), 0, 0)
         let projectionRow2 = simd_float4(0, 0,  Float(far / (far - near)), 1)
@@ -136,15 +97,15 @@ class ViewController: NSViewController {
         
         // Rotation Z
         matRotZMat4x4 = Mat4x4(m: [[ cos(theta), sin(theta), 0, 0],
-                             [-sin(theta), cos(theta), 0, 0],
-                             [0, 0, 1, 0],
-                             [0, 0, 0, 1]])
+                                   [-sin(theta), cos(theta), 0, 0],
+                                   [0,        0,          1,    0],
+                                   [0,        0,          0,    1]])
 
         // Rotation X
-        matRotXMat4x4 = Mat4x4(m: [[1, 0, 0, 0],
-                             [0,  cos(theta * 0.5), sin(theta * 0.5), 0],
-                             [0, -sin(theta * 0.5), cos(theta * 0.5), 0],
-                             [0, 0, 0, 1]])
+        matRotXMat4x4 = Mat4x4(m: [[1,                 0,                0, 0],
+                                   [0,  cos(theta * 0.5), sin(theta * 0.5), 0],
+                                   [0, -sin(theta * 0.5), cos(theta * 0.5), 0],
+                                   [0,                 0,                0, 1]])
 
 
         var triangles: [(Triangle, Float)] = []
