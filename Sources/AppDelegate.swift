@@ -1,0 +1,33 @@
+import AppKit
+import MetalKit
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var window: NSWindow!
+    var metalView: MTKView!
+    var renderer: Renderer!
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            fatalError("Metal is not supported on this device")
+        }
+
+        window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 480 * 3, height: 272 * 3),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+
+        metalView = MTKView(frame: window.contentView!.bounds, device: device)
+        metalView.clearColor = MTLClearColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
+        metalView.autoresizingMask = [.width, .height]
+
+        window.contentView = metalView
+        window.title = "Metal Window"
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+
+        renderer = Renderer(metalView: metalView, device: device)
+        metalView.delegate = renderer
+    }
+}
