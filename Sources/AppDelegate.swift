@@ -1,10 +1,22 @@
 import AppKit
 import MetalKit
 
+@main
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
     var metalView: MTKView!
     var renderer: Renderer!
+
+    static func main() {
+        let app = NSApplication.shared
+        let delegate = AppDelegate()
+        app.delegate = delegate
+
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+
+        app.run()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let device = MTLCreateSystemDefaultDevice() else {
@@ -23,7 +35,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         metalView.autoresizingMask = [.width, .height]
 
         window.contentView = metalView
-        window.title = "Metal Window"
+        window.title = "IronFPS"
         window.center()
         window.makeKeyAndOrderFront(nil)
 

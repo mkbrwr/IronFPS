@@ -16,7 +16,7 @@ public class ShaderCompiler {
             let shaderSource = try String(contentsOf: url, encoding: .utf8)
 
             let compileOptions = MTLCompileOptions()
-            compileOptions.languageVersion = .version3_2
+            compileOptions.languageVersion = .version3_1
 
             self.library = try device.makeLibrary(source: shaderSource, options: compileOptions)
         } catch {

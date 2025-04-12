@@ -8,7 +8,7 @@ class Renderer: NSObject, MTKViewDelegate {
     var pipelineState: MTLRenderPipelineState!
     var vertexBuffer: MTLBuffer!
 
-    func setupPipeline() {
+    private func setupPipeline() {
         let library = ShaderCompiler(device: device)!.library
 
         let vertexFunc = library.makeFunction(name: "vertexShader")
@@ -66,6 +66,7 @@ class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.present(drawable)
         commandBuffer.commit()
     }
+
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         // Handle resize if needed
     }
