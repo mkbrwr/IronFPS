@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480 * 3, height: 272 * 3),
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 272),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
@@ -38,8 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = "IronFPS"
         window.center()
         window.makeKeyAndOrderFront(nil)
-
-        renderer = Renderer(metalView: metalView, device: device)
+        renderer = Renderer.init(metalKitView: metalView)
         metalView.delegate = renderer
     }
 }
