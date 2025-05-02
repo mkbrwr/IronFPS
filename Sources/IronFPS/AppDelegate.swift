@@ -40,5 +40,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         renderer = Renderer.init(metalKitView: metalView)
         metalView.delegate = renderer
+
+        // Draw a grid on the texture
+        renderer.clearTextureBuffer(color: (1.0, 1.0, 1.0, 1.0))
+        renderer.drawGrid(cellSize: 32, color: (1.0, 0.0, 0.0, 1.0))
     }
 }

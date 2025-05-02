@@ -1,37 +1,20 @@
-/*
-See the LICENSE.txt file for this sample's licensing information.
-
-Abstract:
-Implementation for a renderer class that performs Metal setup and
- per-frame rendering.
-*/
-
 import MetalKit
 import Support
 
-// The main class performing the rendering.
 @MainActor
 class Renderer: NSObject, MTKViewDelegate {
-    // Texture to render to and then sample from.
     private var renderTargetTexture: MTLTexture!
-
-    // Render pass descriptor to draw to the texture
     private var renderToTextureRenderPassDescriptor: MTLRenderPassDescriptor!
-
-    // A pipeline object to render to the offscreen texture.
     private var renderToTextureRenderPipeline: MTLRenderPipelineState!
-
-    // A pipeline object to render to the screen.
     private var drawableRenderPipeline: MTLRenderPipelineState!
-
-    // Ratio of width to height to scale positions in the vertex shader.
     private var aspectRatio: Float = 1.0
-
     private var device: MTLDevice!
-
     private var commandQueue: MTLCommandQueue!
+    private var textureBuffer: MTLBuffer!
+    private var textureSize: CGSize!
+    private var bytesPerRow: Int!
+    private var region: MTLRegion!
 
-    /// Initializes the renderer with the MetalKit view from which you obtain the Metal device.
     init(metalKitView mtkView: MTKView) {
         super.init()
 
@@ -41,7 +24,6 @@ class Renderer: NSObject, MTKViewDelegate {
 
         commandQueue = device.makeCommandQueue()
 
-        // Set up a texture for rendering to and sampling from
         let texDescriptor = MTLTextureDescriptor()
         texDescriptor.textureType = .type2D
         texDescriptor.width = 512
@@ -51,8 +33,17 @@ class Renderer: NSObject, MTKViewDelegate {
 
         renderTargetTexture = device.makeTexture(descriptor: texDescriptor)
 
-        // Set up a render pass descriptor for the render pass to render into
-        // renderTargetTexture.
+        textureSize = CGSize(width: 512, height: 512)
+        bytesPerRow = 4 * Int(textureSize.width)
+        region = MTLRegion(
+            origin: MTLOrigin(x: 0, y: 0, z: 0),
+            size: MTLSize(width: Int(textureSize.width), height: Int(textureSize.height), depth: 1)
+        )
+
+        let bufferSize = bytesPerRow * Int(textureSize.height)
+        textureBuffer = device.makeBuffer(length: bufferSize, options: .storageModeShared)
+
+        clearTextureBuffer(color: (1.0, 1.0, 1.0, 1.0))
 
         renderToTextureRenderPassDescriptor = MTLRenderPassDescriptor()
 
@@ -85,10 +76,8 @@ class Renderer: NSObject, MTKViewDelegate {
             fatalError("Failed to create pipeline state to render to screen: \(error)")
         }
 
-        // Set up pipeline for rendering to the offscreen texture. Reuse the
-        // descriptor and change properties that differ.
         pipelineStateDescriptor.label = "Offscreen Render Pipeline"
-        pipelineStateDescriptor.sampleCount = 1
+        pipelineStateDescriptor.rasterSampleCount = 1
         pipelineStateDescriptor.vertexFunction = defaultLibrary.makeFunction(
             name: "simpleVertexShader")
         pipelineStateDescriptor.fragmentFunction = defaultLibrary.makeFunction(
@@ -103,56 +92,125 @@ class Renderer: NSObject, MTKViewDelegate {
         }
     }
 
-    // MARK: - MetalKit View Delegate
+    func clearTextureBuffer(color: (Float, Float, Float, Float)) {
+        let contents = textureBuffer.contents()
 
-    // Handles view orientation and size changes.
+        let r = UInt8(color.0 * 255.0)
+        let g = UInt8(color.1 * 255.0)
+        let b = UInt8(color.2 * 255.0)
+        let a = UInt8(color.3 * 255.0)
+
+        let bufferPointer = contents.bindMemory(
+            to: UInt8.self, capacity: bytesPerRow * Int(textureSize.height))
+
+        for y in 0..<Int(textureSize.height) {
+            for x in 0..<Int(textureSize.width) {
+                let pixelOffset = (y * bytesPerRow) + (x * 4)
+                bufferPointer[pixelOffset] = r
+                bufferPointer[pixelOffset + 1] = g
+                bufferPointer[pixelOffset + 2] = b
+                bufferPointer[pixelOffset + 3] = a
+            }
+        }
+    }
+
+    func setPixel(x: Int, y: Int, color: (Float, Float, Float, Float)) {
+        let contents = textureBuffer.contents()
+        guard x >= 0 && x < Int(textureSize.width) && y >= 0 && y < Int(textureSize.height) else {
+            return
+        }
+
+        let r = UInt8(color.0 * 255.0)
+        let g = UInt8(color.1 * 255.0)
+        let b = UInt8(color.2 * 255.0)
+        let a = UInt8(color.3 * 255.0)
+
+        let bufferPointer = contents.bindMemory(
+            to: UInt8.self, capacity: bytesPerRow * Int(textureSize.height))
+
+        let flippedY = Int(textureSize.height) - 1 - y
+        let pixelOffset = (flippedY * bytesPerRow) + (x * 4)
+
+        bufferPointer[pixelOffset] = r
+        bufferPointer[pixelOffset + 1] = g
+        bufferPointer[pixelOffset + 2] = b
+        bufferPointer[pixelOffset + 3] = a
+    }
+
+    func drawLine(from: (Int, Int), to: (Int, Int), color: (Float, Float, Float, Float)) {
+        let x0 = from.0
+        let y0 = from.1
+        let x1 = to.0
+        let y1 = to.1
+
+        let dx = abs(x1 - x0)
+        let sx = x0 < x1 ? 1 : -1
+        let dy = -abs(y1 - y0)
+        let sy = y0 < y1 ? 1 : -1
+        var err = dx + dy
+        var e2: Int
+
+        var currentX = x0
+        var currentY = y0
+
+        while true {
+            setPixel(x: currentX, y: currentY, color: color)
+            if currentX == x1 && currentY == y1 { break }
+            e2 = 2 * err
+            if e2 >= dy {
+                if currentX == x1 { break }
+                err += dy
+                currentX += sx
+            }
+            if e2 <= dx {
+                if currentY == y1 { break }
+                err += dx
+                currentY += sy
+            }
+        }
+    }
+
+    func drawGrid(cellSize: Int, color: (Float, Float, Float, Float)) {
+        let width = Int(textureSize.width)
+        let height = Int(textureSize.height)
+
+        for x in stride(from: 0, through: width, by: cellSize) {
+            drawLine(from: (x, 0), to: (x, height - 1), color: color)
+        }
+
+        for y in stride(from: 0, through: height, by: cellSize) {
+            drawLine(from: (0, y), to: (width - 1, y), color: color)
+        }
+    }
+
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         aspectRatio = Float(size.height) / Float(size.width)
     }
 
-    // Handles view rendering for a new frame.
     func draw(in view: MTKView) {
         let commandBuffer = commandQueue.makeCommandBuffer()
         commandBuffer?.label = "Command Buffer"
 
-        do {
-            let triVertices: [AAPLSimpleVertex] = [
-                // Positions     ,  Colors
-                AAPLSimpleVertex(
-                    position: vector_float2(0.5, -0.5), color: vector_float4(1.0, 0.0, 0.0, 1.0)),
-                AAPLSimpleVertex(
-                    position: vector_float2(-0.5, -0.5), color: vector_float4(0.0, 1.0, 0.0, 1.0)),
-                AAPLSimpleVertex(
-                    position: vector_float2(0.0, 0.5), color: vector_float4(0.0, 0.0, 1.0, 0.0)),
-            ]
-
-            guard
-                let renderEncoder = commandBuffer?.makeRenderCommandEncoder(
-                    descriptor: renderToTextureRenderPassDescriptor)
-            else {
-                return
-            }
-
-            renderEncoder.label = "Offscreen Render Pass"
-            renderEncoder.setRenderPipelineState(renderToTextureRenderPipeline)
-
-            renderEncoder.setVertexBytes(
-                triVertices,
-                length: MemoryLayout<AAPLSimpleVertex>.stride * triVertices.count,
-                index: 0)
-
-            renderEncoder.drawPrimitives(
-                type: .triangle,
-                vertexStart: 0,
-                vertexCount: 3)
-
-            // End encoding commands for this render pass.
-            renderEncoder.endEncoding()
-        }
+        let blitEncoder = commandBuffer?.makeBlitCommandEncoder()
+        blitEncoder?.copy(
+            from: textureBuffer,
+            sourceOffset: 0,
+            sourceBytesPerRow: bytesPerRow,
+            sourceBytesPerImage: bytesPerRow * Int(textureSize.height),
+            sourceSize: MTLSize(
+                width: Int(textureSize.width),
+                height: Int(textureSize.height),
+                depth: 1
+            ),
+            to: renderTargetTexture,
+            destinationSlice: 0,
+            destinationLevel: 0,
+            destinationOrigin: MTLOrigin(x: 0, y: 0, z: 0)
+        )
+        blitEncoder?.endEncoding()
 
         if let drawableRenderPassDescriptor = view.currentRenderPassDescriptor {
             let quadVertices: [AAPLTextureVertex] = [
-                // Positions     , Texture coordinates
                 AAPLTextureVertex(
                     position: vector_float2(0.5, -0.5), texcoord: vector_float2(1.0, 1.0)),
                 AAPLTextureVertex(
@@ -189,11 +247,9 @@ class Renderer: NSObject, MTKViewDelegate {
                 length: MemoryLayout<Float>.size,
                 index: 1)
 
-            // Set the offscreen texture as the source texture.
             renderEncoder.setFragmentTexture(
                 renderTargetTexture, index: 0)
 
-            // Draw quad with rendered texture.
             renderEncoder.drawPrimitives(
                 type: .triangle,
                 vertexStart: 0,
