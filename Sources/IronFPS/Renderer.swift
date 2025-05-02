@@ -183,6 +183,24 @@ class Renderer: NSObject, MTKViewDelegate {
         }
     }
 
+    func drawRect(
+        x: Int, y: Int, width: Int, height: Int, color: (Float, Float, Float, Float),
+        fill: Bool = true
+    ) {
+        if fill {
+            for currentY in y..<(y + height) {
+                for currentX in x..<(x + width) {
+                    setPixel(x: currentX, y: currentY, color: color)
+                }
+            }
+        } else {
+            drawLine(from: (x, y), to: (x + width - 1, y), color: color)
+            drawLine(from: (x, y + height - 1), to: (x + width - 1, y + height - 1), color: color)
+            drawLine(from: (x, y), to: (x, y + height - 1), color: color)
+            drawLine(from: (x + width - 1, y), to: (x + width - 1, y + height - 1), color: color)
+        }
+    }
+
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         aspectRatio = Float(size.height) / Float(size.width)
     }

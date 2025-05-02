@@ -41,8 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         renderer = Renderer.init(metalKitView: metalView)
         metalView.delegate = renderer
 
-        // Draw a grid on the texture
         renderer.clearTextureBuffer(color: (1.0, 1.0, 1.0, 1.0))
-        renderer.drawGrid(cellSize: 32, color: (1.0, 0.0, 0.0, 1.0))
+        renderer.drawRect(x: 20, y: 30, width: 100, height: 80, color: (1.0, 0.0, 1.0, 1.0))
     }
 }
