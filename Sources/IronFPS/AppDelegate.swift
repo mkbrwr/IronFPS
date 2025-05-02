@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 272),
+            contentRect: NSRect(x: 0, y: 0, width: 512 / 0.95, height: 512 / 0.95),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
@@ -42,6 +42,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         metalView.delegate = renderer
 
         renderer.clearTextureBuffer(color: (1.0, 1.0, 1.0, 1.0))
-        renderer.drawRect(x: 20, y: 30, width: 100, height: 80, color: (1.0, 0.0, 1.0, 1.0))
+
+        createCube()
+    }
+
+    @MainActor
+    func createCube() {
+        let min: Float = -1.0
+        let max: Float = 1.0
+        let step: Float = (max - min) / 8.0
+
+        for i in 0..<9 {
+            let x = min + Float(i) * step
+            for j in 0..<9 {
+                let y = min + Float(j) * step
+                for k in 0..<9 {
+                    let z = min + Float(k) * step
+
+                    let point = Vec3D(x, y, z)
+
+                    renderer.render(points: [point], color: (1.0, 0.0, 0.0, 1.0))
+                }
+            }
+        }
     }
 }

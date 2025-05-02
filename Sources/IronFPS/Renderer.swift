@@ -201,6 +201,20 @@ class Renderer: NSObject, MTKViewDelegate {
         }
     }
 
+    var projectedPoints: [Vec2D] = []
+    var fov_factor: Float = 128.0
+
+    func project(_ vec3: Vec3D) -> Vec2D {
+        .init(vec3.x * fov_factor, vec3.y * fov_factor)
+    }
+
+    func render(points: [Vec3D], color: (Float, Float, Float, Float)) {
+        for point in points.map(project) {
+            drawRect(
+                x: Int(point.x) + 262, y: Int(point.y) + 262, width: 4, height: 4, color: color)
+        }
+    }
+
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         aspectRatio = Float(size.height) / Float(size.width)
     }
@@ -230,18 +244,18 @@ class Renderer: NSObject, MTKViewDelegate {
         if let drawableRenderPassDescriptor = view.currentRenderPassDescriptor {
             let quadVertices: [AAPLTextureVertex] = [
                 AAPLTextureVertex(
-                    position: vector_float2(0.5, -0.5), texcoord: vector_float2(1.0, 1.0)),
+                    position: vector_float2(0.95, -0.95), texcoord: vector_float2(1.0, 1.0)),
                 AAPLTextureVertex(
-                    position: vector_float2(-0.5, -0.5), texcoord: vector_float2(0.0, 1.0)),
+                    position: vector_float2(-0.95, -0.95), texcoord: vector_float2(0.0, 1.0)),
                 AAPLTextureVertex(
-                    position: vector_float2(-0.5, 0.5), texcoord: vector_float2(0.0, 0.0)),
+                    position: vector_float2(-0.95, 0.95), texcoord: vector_float2(0.0, 0.0)),
 
                 AAPLTextureVertex(
-                    position: vector_float2(0.5, -0.5), texcoord: vector_float2(1.0, 1.0)),
+                    position: vector_float2(0.95, -0.95), texcoord: vector_float2(1.0, 1.0)),
                 AAPLTextureVertex(
-                    position: vector_float2(-0.5, 0.5), texcoord: vector_float2(0.0, 0.0)),
+                    position: vector_float2(-0.95, 0.95), texcoord: vector_float2(0.0, 0.0)),
                 AAPLTextureVertex(
-                    position: vector_float2(0.5, 0.5), texcoord: vector_float2(1.0, 0.0)),
+                    position: vector_float2(0.95, 0.95), texcoord: vector_float2(1.0, 0.0)),
             ]
 
             guard
