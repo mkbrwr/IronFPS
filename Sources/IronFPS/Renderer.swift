@@ -202,10 +202,12 @@ class Renderer: NSObject, MTKViewDelegate {
     }
 
     var projectedPoints: [Vec2D] = []
-    var fov_factor: Float = 128.0
+    var fov_factor: Float = 640.0
+    var cameraPosition: Vec3D = .init(x: 0, y: 0, z: -5)
 
     func project(_ vec3: Vec3D) -> Vec2D {
-        .init(vec3.x * fov_factor, vec3.y * fov_factor)
+        let z = vec3.z - cameraPosition.z
+        return .init(vec3.x * fov_factor / z, vec3.y * fov_factor / z)
     }
 
     func render(points: [Vec3D], color: (Float, Float, Float, Float)) {
