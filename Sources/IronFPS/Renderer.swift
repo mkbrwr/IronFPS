@@ -90,7 +90,11 @@ class Renderer: NSObject, MTKViewDelegate {
         } catch {
             fatalError("Failed to create pipeline state to render to texture: \(error)")
         }
+
+        cube = createCube()
     }
+
+    var cube: [Vec3D] = []
 
     func clearTextureBuffer(color: (Float, Float, Float, Float)) {
         let contents = textureBuffer.contents()
@@ -204,17 +208,54 @@ class Renderer: NSObject, MTKViewDelegate {
     var projectedPoints: [Vec2D] = []
     var fov_factor: Float = 640.0
     var cameraPosition: Vec3D = .init(x: 0, y: 0, z: -5)
+    //var cubeRotation: Vec3D = .init(x: 0, y: 0, z: 0)
 
     func project(_ vec3: Vec3D) -> Vec2D {
         let z = vec3.z - cameraPosition.z
         return .init(vec3.x * fov_factor / z, vec3.y * fov_factor / z)
     }
 
+    var cubeRotation: Float = 0.0
+
     func render(points: [Vec3D], color: (Float, Float, Float, Float)) {
-        for point in points.map(project) {
+        cubeRotation += 0.01
+        for point in points {
+            let transformedPointa = vec3RotateX(point, angle: cubeRotation)
+            let transformedPointb = vec3RotateY(transformedPointa, angle: cubeRotation)
+            let transformedPoint = vec3RotateZ(transformedPointb, angle: cubeRotation)
+
+            // Translate the points away from the camera
+            let translatedPoint = Vec3D(
+                x: transformedPoint.x, y: transformedPoint.y,
+                z: transformedPoint.z - cameraPosition.z)
+
+            // Project the current point
+            let projectedPoint = project(translatedPoint)
+
             drawRect(
-                x: Int(point.x) + 262, y: Int(point.y) + 262, width: 4, height: 4, color: color)
+                x: Int(projectedPoint.x) + 262, y: Int(projectedPoint.y) + 262, width: 4, height: 4,
+                color: color)
         }
+    }
+
+    func createCube() -> [Vec3D] {
+        let min: Float = -1.0
+        let max: Float = 1.0
+        let step: Float = (max - min) / 8.0
+
+        var points: [Vec3D] = []
+        for i in 0..<9 {
+            let x = min + Float(i) * step
+            for j in 0..<9 {
+                let y = min + Float(j) * step
+                for k in 0..<9 {
+                    let z = min + Float(k) * step
+
+                    points.append(Vec3D(x, y, z))
+                }
+            }
+        }
+        return points
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -222,6 +263,8 @@ class Renderer: NSObject, MTKViewDelegate {
     }
 
     func draw(in view: MTKView) {
+        clearTextureBuffer(color: (0.1, 0.1, 0.1, 1.0))
+        render(points: cube, color: (1.0, 0.0, 1.0, 1.0))
         let commandBuffer = commandQueue.makeCommandBuffer()
         commandBuffer?.label = "Command Buffer"
 

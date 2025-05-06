@@ -42,34 +42,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.makeKeyAndOrderFront(nil)
         renderer = Renderer.init(metalKitView: metalView)
         metalView.delegate = renderer
-
-        renderer.clearTextureBuffer(color: (1.0, 1.0, 1.0, 1.0))
-
-        createCube()
     }
 
     func windowWillClose(_ notification: Notification) {
         exit(0)
-    }
-    
-    @MainActor
-    func createCube() {
-        let min: Float = -1.0
-        let max: Float = 1.0
-        let step: Float = (max - min) / 8.0
-
-        for i in 0..<9 {
-            let x = min + Float(i) * step
-            for j in 0..<9 {
-                let y = min + Float(j) * step
-                for k in 0..<9 {
-                    let z = min + Float(k) * step
-
-                    let point = Vec3D(x, y, z)
-
-                    renderer.render(points: [point], color: (1.0, 0.0, 0.0, 1.0))
-                }
-            }
-        }
     }
 }
