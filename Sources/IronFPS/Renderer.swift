@@ -1,7 +1,6 @@
 import MetalKit
 import Support
 
-@MainActor
 class Renderer: NSObject, MTKViewDelegate {
     private var renderTargetTexture: MTLTexture!
     private var renderToTextureRenderPassDescriptor: MTLRenderPassDescriptor!
@@ -15,13 +14,13 @@ class Renderer: NSObject, MTKViewDelegate {
     private var bytesPerRow: Int!
     private var region: MTLRegion!
 
+    var fov_factor: Float = 640.0
+    var cameraPosition: Vec3D = .init(x: 0, y: 0, z: -5)
+
+    @MainActor
     init(metalKitView mtkView: MTKView) {
         super.init()
-
-        device = mtkView.device
-
-        mtkView.clearColor = MTLClearColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
-
+        device = mtkView.device!
         commandQueue = device.makeCommandQueue()
 
         let texDescriptor = MTLTextureDescriptor()
@@ -90,11 +89,7 @@ class Renderer: NSObject, MTKViewDelegate {
         } catch {
             fatalError("Failed to create pipeline state to render to texture: \(error)")
         }
-
-        cube = createCube()
     }
-
-    var cube: [Vec3D] = []
 
     func clearTextureBuffer(color: (Float, Float, Float, Float)) {
         let contents = textureBuffer.contents()
@@ -205,11 +200,6 @@ class Renderer: NSObject, MTKViewDelegate {
         }
     }
 
-    var projectedPoints: [Vec2D] = []
-    var fov_factor: Float = 640.0
-    var cameraPosition: Vec3D = .init(x: 0, y: 0, z: -5)
-    //var cubeRotation: Vec3D = .init(x: 0, y: 0, z: 0)
-
     func project(_ vec3: Vec3D) -> Vec2D {
         let z = vec3.z - cameraPosition.z
         return .init(vec3.x * fov_factor / z, vec3.y * fov_factor / z)
@@ -238,33 +228,11 @@ class Renderer: NSObject, MTKViewDelegate {
         }
     }
 
-    func createCube() -> [Vec3D] {
-        let min: Float = -1.0
-        let max: Float = 1.0
-        let step: Float = (max - min) / 8.0
-
-        var points: [Vec3D] = []
-        for i in 0..<9 {
-            let x = min + Float(i) * step
-            for j in 0..<9 {
-                let y = min + Float(j) * step
-                for k in 0..<9 {
-                    let z = min + Float(k) * step
-
-                    points.append(Vec3D(x, y, z))
-                }
-            }
-        }
-        return points
-    }
-
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         aspectRatio = Float(size.height) / Float(size.width)
     }
 
     func draw(in view: MTKView) {
-        clearTextureBuffer(color: (0.1, 0.1, 0.1, 1.0))
-        render(points: cube, color: (1.0, 0.0, 1.0, 1.0))
         let commandBuffer = commandQueue.makeCommandBuffer()
         commandBuffer?.label = "Command Buffer"
 
