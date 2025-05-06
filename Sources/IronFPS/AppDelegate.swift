@@ -2,7 +2,7 @@ import AppKit
 import MetalKit
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!
     var metalView: MTKView!
     var renderer: Renderer!
@@ -30,6 +30,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defer: false
         )
 
+        window.delegate = self
+
         metalView = MTKView(frame: window.contentView!.bounds, device: device)
         metalView.clearColor = MTLClearColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
         metalView.autoresizingMask = [.width, .height]
@@ -46,6 +48,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         createCube()
     }
 
+    func windowWillClose(_ notification: Notification) {
+        exit(0)
+    }
+    
     @MainActor
     func createCube() {
         let min: Float = -1.0
